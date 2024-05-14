@@ -1,0 +1,266 @@
+﻿<style>
+    .picked {
+        background-color: #ffcc00 !important; /* Màu chữ khi được chọn */
+        color: #000 !important;/* Màu nền khi được chọn */
+    }
+    .selected {
+        transition: background-color 0.3s ease; /* Hiệu ứng chuyển đổi màu nền */
+        color: #ff0000;
+    }
+
+    .menu-item {
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        height: auto; /* Tự động co dãn theo chiều dọc */
+        color: #ffcc00; /* Màu chữ khi được chọn */
+        background-color: #000; /* Màu nền khi được chọn */
+        align-items: center; /* Canh giữa theo chiều dọc */
+        margin-right: 100px; /* Lệch về phía trái */
+    }
+
+    .information {
+        border: 1px solid #ccc; /* Viền cho phần thông tin */
+        padding: 10px; /* Khoảng cách giữa nội dung và viền */
+        border-radius: 5px; /* Bo tròn viền */
+    }
+
+    #content {
+        border: 1px solid #ccc; /* Màu và độ rộng của khung */
+        padding: 10px; /* Khoảng cách giữa nội dung và khung */
+        margin-top: 10px; /* Khoảng cách giữa menu và content box */
+    }
+
+
+    #active li {
+        color: #ff0000; /* Màu chữ ban đầu */
+        transition: all 0.3s ease-in-out; /* Hiệu ứng chuyển đổi màu */
+        align-items: center; /* Canh giữa theo chiều dọc */
+        margin-left: -5px; /* Lệch về phía trái một chút */
+    }
+
+        #active li:hover {
+            color: #b30000; /* Màu chữ khi hover */
+            transform: scale(1.1); /* Phình ra khi hover */
+        }
+
+        #active li:active {
+            color: #ffcc00; /* Màu chữ khi được chọn */
+            background-color: #000; /* Màu nền khi được chọn */
+
+</style>
+<div class="container py-5 mt-5" style="min-height:600px;">
+    <div class="text-primary">
+    </div>
+    <hr />
+    <div class="row px-xl-5">
+        <div class="col-lg-5 pb-5">
+            <div id="product-carousel" class="d-flex justify-content-center align-items-center" data-ride="carousel">
+                <div class="">
+                    <br />
+                    <div class="active">
+                        <div class="menu-item" onclick="showContent(0, this)" id="firstload" onmouseover="zoomIn(this)" onmouseout="zoomOut(this)">
+                            <p>Reward points program</p>
+                        </div>
+                        @*
+                        <div class="menu-item" onclick="showContent(1, this)" onmouseover="zoomIn(this)" onmouseout="zoomOut(this)">
+                            <p>Birthday gifts</p>
+                        </div>
+                        <div class="menu-item" onclick="showContent(2, this)" onmouseover="zoomIn(this)" onmouseout="zoomOut(this)">
+                            <p>Membership level</p>
+                        </div>
+                        *@
+                        <div class="menu-item" onclick="showContent(3, this)" onmouseover="zoomIn(this)" onmouseout="zoomOut(this)">
+                            <p>Account management</p>
+                        </div>
+                        <div class="menu-item" onclick="showContent(4, this)" onmouseover="zoomIn(this)" onmouseout="zoomOut(this)">
+                            <p>Support</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 pb-5">
+
+            <div id="content">
+                <div id="content-box"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+            showContent(0, document.getElementById("firstload"));
+        });
+        /* // Hàm để hiển thị nội dung và lưu trạng thái của mỗi mục được chọn */
+
+        function showContent(index, item) {
+            var contentBox = document.getElementById("content-box");
+            var content = "";
+            /* item.classList.remove('menu-item'); */
+            var list = document.getElementsByClassName('menu-item');
+            for (let i = 0; i < list.length; i++) {
+                list[i].classList.remove('picked');
+            }
+
+            item.classList.add('picked');
+            if (index === 0) {
+                content = `
+                                <h4>REWARD POINTS PROGRAM</h4>
+                            <br>
+                                <p>The program includes CinemaHub Member with different benefits and incentives. Every time you make a transaction at the CinemaHub theater system, you will receive a number of bonus points corresponding to the value of order:</p>
+                            <table border="0" style="width: 100%;">
+                            <tbody>
+                                <tr><th style="width: 31%;">Reward Points</th><th style="width: 23%;"> = 1000 x </th><th style="width: 23%;">5% x </th><th style="width: 23%;">Order Value</th></tr>
+                          
+                                <tr>
+                                    <td>EX: 5000 Points</td>
+                                        <td>= 1000 x </td>
+                                            <td>5 % x </td>
+                                            <td>100$</td>
+                                </tr>
+                               
+                            </tbody>
+                            </table>
+                                    <p>1 $ = 1.000 Points, has the same value as cash, can be used to buy movie tickets at CinemaHub and redeem promotional vouchers on CinemaHub Reward.</p>
+                            <p><strong>Note:</strong></p>
+                            <ol>
+                                    <li>Transactions have 100% payment with bonus points</li>
+                                    <li>You can easily check your reward points on CinemaHub Website.</li>
+                                    <li>When making transactions using bonus points or free tickets directly at the theater, customers please present their membership account (Hard card or online account) and ID or other documents showing the date.</li>
+                                    <li>When buying tickets online and paying with points, vouchers, the system will ask you to enter the payment password.</li>
+                            </ol>
+                            `;
+            } else if (index === 1) {
+                content = `
+                                        <h4>BIRTHDAY GIFTS</h4>
+                                    <br>
+                                <p><strong>Birthday gift policy for each CinemaHub membership level:</strong></p>
+                                <p>-Dear & U22: 01 CinemaHub Birthday Combo</p>
+                                <p>-VIP: 01 CinemaHub Birthday Combo + 01 Cinema ticket 2D/3D</p>
+                                <p>-VVIP: CinemaHub Birthday Combo + 02 Cinema ticket 2D/3D</p>
+                                <p><strong>Note:</strong> On their 23rd birthday, U22 members will receive an additional 2D/3D movie ticket in addition to the CinemaHub Birthday Combo.</p>
+                                <p><strong>(*) CinemaHub Birthday Combo = 1 Sweet Corn size 44oz + 2 Drinks size 22oz</strong></p>
+                                <p>When coming to the theater to redeem gifts, customers please present their membership account (hard card or online account) and identification documents or other documents showing date of birth (original or photo) to the staff. theater to authenticate the member account owner. Theater staff has the right to refuse a request to exchange birthday gifts if the customer cannot provide a membership account and/or documents specified herein or the information provided by the Customer does not match.</p>
+                                <p><strong>Terms and Conditions:</strong></p>
+                                <p>1. To receive birthday gifts, members must have at least 01 transaction recording cumulative spending within the most recent 12 months. (*) Does not include transactions occurring in the customer's birthday month of the previous year. If the conditions are not met, the customer can make a new transaction right in the birthday month and receive the gift 2 days later from the time the accumulated spending is recorded, provided that that time is still within the month. birthday.</p>
+                                <p><strong>Note:</strong></p>
+                                <p>(1) Transactions that record accumulated spending are transactions that buy tickets/drinks on CinemaHub Web or at movie theaters with a membership card presented to accumulate points; DO NOT accumulate spending on transactions that have applied discounts from promotions organized by CinemaHub or its partners.</p>
+                    <p>DO NOT accumulate spending/reward points for transactions: (a) Buy/use vouchers; (b) Purchase gift cards; (c) Buy tickets/ F&B with CinemaHub card, membership card and Premium card; (d) Transactions have 100% payment in reward points.</p>
+                    <p>(2) For example: If you make 01 transaction to record cumulative spending in July 2024 and your birthday is between July 2024 and June 2025, you will receive birthday gift from CinemaHub for my upcoming birthday month.</p>
+                    <p>(3) Your accumulated spending will be credited to your account on the same day of the transaction and displayed on the member account on the web/app at 6:00 am the next day.</ p>
+                    <p>(4) (In case you have a birthday in July)</p>
+                    <p><strong>For example:</strong></p>
+                    p>- Make 01 transaction to record accumulated spending on July 29  You will receive a birthday gift on July 31;</p>
+                    <p>- Make 01 transaction to record accumulated spending on July 30  You will NOT receive a birthday gift (Because 02 days later is August 1).</p>
+                    <p>- Make 01 ticket booking transaction on July 29 for a show ending on July 30. You will NOT receive a birthday gift because after 02 days from the time the accumulated spending is recorded ( July 30) is August 1).</p>
+                    <p>2. Deadline for receiving and using birthday gifts:</p>
+                    <p>- Gift receipt period: Eligible members will receive birthday gifts from CinemaHub within the first 3 days of their birthday month. To check your birthday gift, please access the "COUPON" section on the CinemaHub app after logging in to your online account (If not using the web, members please bring a hard card & CCCD to the theater and ask the staff for assistance). assist in checking and exchanging birthday gifts.)</p>
+                    <p>- Expiry date: Birthday gift coupon is only valid for use in the birthday month (After the new month, the coupon will automatically disappear). If your birthday coupon is a movie ticket, you can use it to book showings taking place in the following month, provided that at the time of booking the ticket is still within your birthday month.</p>
+                    <p>3. When receiving birthday gifts, please present: (1) ID card/CCCD and (2) Membership hard card/CinemaHub App with logged in account for comparison. The date of birth information on the customer's ID card/CCCD must match the information used to register for a CinemaHub member account. If these two information do not match, the staff has the right to refuse to give the customer a birthday gift.</p>
+                    <p>4. To change the date of birth information of your member account, please bring your CCCD and visit the nearest CinemaHub theater for support. (Note: Each account can only request to change date of birth up to 3 times.)</p>
+                    <p>5. New members will start receiving birthday gifts after 72 hours from the date of membership registration &amp; There is a transaction to record accumulated spending 02 days before the time of receiving the gift, provided that the time to receive the gift is still within the birthday month.</p>
+                    <p>6. Birthday gifts cannot be exchanged for cash or refunded for change.</p>
+                    <p>7. After redeeming the birthday gift at the counter, customers are not allowed to request a refund/cancel/receive the birthday gift coupon.</p>
+                    <p>8. 01 CinemaHub Birthday Combo includes: 01 Sweet Corn size 44oz and 02 Soft drinks size 22oz, applicable only directly at the counter. If you need to change flavors, please pay the additional fee.</p>
+                    <p>9. VVIP customers please use both movie ticket coupons in the birthday gift section when making transactions (separate tickets are not applicable for multiple transactions).</p>
+                    <p>10. Each movie ticket in the birthday gift combo is equivalent to 01 2D/3D ticket for regular or VIP seats at regular theaters, NOT applicable to special format theaters (4DX, ULTRA 4DX, IMAX, GOLD GLASS, SWEETBOX , STARIUM, L'AMOUR, PREMIUM, SCREENX, CINE &amp; FORÊT, CINE &amp; LIVING ROOM).</p>
+                    <p>11. Movie tickets included in the birthday gift combo are applicable for all days of the week including Holidays/New Year, NOT applicable for early screenings of Sneak Show &amp; Early Release.</p>
+                    <p>12. The process of exchanging daily birthday gifts for customers at theaters may be suspended ahead of time and without prior notice depending on the actual number of gifts remaining on the day at each theater.</p>
+                            `;
+            } else if (index === 2) {
+                content = `
+                                    <h4>MEMBERSHIP LEVEL</h4>
+                                <br>
+                                    <p><strong>U22 member</strong></p>
+                    <p>U22 members include all CinemaHub members younger than 23 years old in the current year. In 2024, U22 members are members born in 2002 or later and receive the following incentives:</p>
+                    <p>- Birthday gift: 01 free CinemaHub Birthday Combo (01 popcorn & 02 drinks) on birthday month and 01 free 2D/3D ticket on 23rd birthday, free ticket valid within birthday month.</p>
+                    <p>- Program to accumulate bonus points for discounts on the following purchases: Accumulate points for 5% of transaction value at the ticket counter and 3% of transaction value at the popcorn counter.</p>
+                    <p>- Opportunity to participate in other special programs only applies to U22 CinemaHub members.</p>
+                    <p>- Especially, from January 18, 2024, all CinemaHub customers aged 23 and under (including U22 members) will receive exclusive ticket prices from only 50,000 VND, popcorn prices from only 78,000 VND.</p>
+                    <p>To improve member account security:</p>
+                    <p>- When making transactions using bonus points or free tickets directly at the theater, customers please present their member account (hard card or online account) and identification documents or other documents. Can show date of birth (original or photo) for theater staff to authenticate the member account owner. Theater staff has the right to refuse a customer's request if the customer cannot provide a membership account and/or documents specified herein or the information provided by the Customer does not match each other. Performing transactions using reward points or free tickets on CinemaHub's website is always assumed to be used by the member account holder. Customers are obliged to keep their Member accounts confidential. CinemaHub Vietnam will not entertain any complaints related to reward points if the transaction using such reward points is made online. <br>CinemaHub Vietnam will not refund and/or resolve used reward points if the Customer cannot prove that the Customer is not the person using the reward points and CinemaHub Vietnam's decision is final. same.</p>
+                    <p>- When buying tickets online and paying with points, coupons, vouchers, Premium cards, membership cards, gift cards, the system will ask you to enter the payment password.</p>
+                    <p><strong>Loyal member (MEMBER)</strong></p>
+                    <p>Loyal members are members who are 23 years old or older and receive the following incentives:</p>
+                    <p>- 01 CinemaHub Birthday Combo (01 popcorn & 02 drinks) for free on birthday month.</p>
+                    <p>- Accumulate points for 5% of transaction value at the ticket counter and 3% of transaction value at the popcorn counter.</p>
+                    <p>- Opportunity to participate in other special programs only applies to CinemaHub members.</p>
+                    <p>To improve member account security:</p>
+                    <p>- When making transactions using bonus points or free tickets directly at the theater, customers please present their member account (hard card or online account) and identification documents or other documents. Can show date of birth (original or photo) for theater staff to authenticate the member account owner. Theater staff has the right to refuse a customer's request if the customer cannot provide a membership account and/or documents specified herein or the information provided by the Customer does not match each other. Performing transactions using reward points or free tickets on CinemaHub's website is always assumed to be used by the member account holder. Customers are obliged to keep their Member accounts confidential. CinemaHub Vietnam will not entertain any complaints related to reward points if the transaction using such reward points is made online. <br> CinemaHub Vietnam will not refund and/or resolve used reward points if the Customer cannot prove that the Customer is not the person using the reward points and CinemaHub Vietnam's decision is final. same.</p>
+                    <p>- When buying tickets online and paying with points, coupons, vouchers, Premium cards, membership cards, gift cards, the system will ask you to enter the payment password</p>
+                    <p><strong>VIP member 2024</strong></p>
+                    <p>- 2024 VIP members are CinemaHub members with total spending in 2023 from 4,000,000 VND to 7,999,999 VND.</p>
+                    <p>(*) Total spending in 2023 is calculated from January 1, 2023 to December 31, 2023.</p>
+                    <p><strong>VIP 2024 benefits:</strong></p>
+                    <p>- 08 free 2D/3D tickets. (Expiry date: until December 31, 2024 and used to book tickets for screenings until January 4, 2025).</p>
+                    <p>- Special birthday gift (01 CinemaHub Birthday Combo & 01 2D/3D ticket), applicable during the birthday month.</p>
+                    <p>- Attractive points accumulation rate: 7% at ticket counter &amp; 4% at the corn and juice counter.</p>
+                    <p><strong>Note:</strong></p>
+                    <p>- VIP membership level and accompanying incentives are only valid until December 31, 2024.</p>
+                    <p>- Customers enjoy promotions at CinemaHub theaters nationwide.</p>
+                    <p>- 2D/3D movie ticket offers are NOT applicable at special cinemas: 4DX, ULTRA 4DX, IMAX, GOLD CLASS, SWEETBOX, STARIUM, L’AMOUR, PREMIUM, SCREENX, CINE &amp; FORÊT, CINE &amp; LIVING ROOM, as well as NOT applicable to Early Shows and Special Shows.</p>
+                    <p>- 2D/3D movie ticket incentives do not apply to holidays and New Year, except for 2D/3D tickets during the birthday month.</p>
+                    <p>- Because each year's membership level is approved based on total spending, your total cumulative spending in 2024 will return to 0 on January 1, 2025.</p>
+                    <p>To improve member account security:</p>
+                    <p>- When making transactions using bonus points or free tickets directly at the theater, customers please present their member account (hard card or online account) and identification documents or other documents. Can show date of birth (original or photo) for theater staff to authenticate the member account owner. Theater staff has the right to refuse a customer's request if the customer cannot provide a membership account and/or documents specified herein or the information provided by the Customer does not match each other. Performing transactions using reward points or free tickets on CinemaHub's website is always assumed to be used by the member account holder. Customers are obliged to keep their Member accounts confidential. CinemaHub Vietnam will not entertain any complaints related to reward points if the transaction using such reward points is made online. <br> CinemaHub Vietnam will not refund and/or resolve used reward points if the Customer cannot prove that the Customer is not the person using the reward points and CinemaHub Vietnam's decision is final. same.</p>
+                    <p>- In case of payment on the CinemaHub website or application, please select the coupon discount method to use the free ticket.</p>
+                    <p>- When buying tickets online and paying with points, coupons, vouchers, Premium cards, membership cards, gift cards, the system will ask you to enter the payment password.</p>
+                    <p><strong>VVIP member 2024</strong></p>
+                    <p>- VVIP 2024 members are CinemaHub members with total spending in 2023 of 8,000,000 VND or more.</p>
+                    <p>(*) Total spending in 2023 is calculated from January 1, 2023 to December 31, 2023</p>
+                    <p><strong>Benefits of VVIP 2024:</strong></p>
+                    <p>- 10 free 2D/3D tickets (expiry date: until December 31, 2024 and can be used to book tickets for screenings until January 4, 2025).</p>
+                    <p>- Special birthday gift (01 CinemaHub Birthday Combo & 02 2D/3D tickets), applicable during the birthday month.</p>
+                    <p>- Shocking point accumulation rate: 10% at ticket counter &amp; 5% at the corn and juice counter.</p>
+                    <p>- 01 special VVIP gift from CinemaHub</p>
+                    <p>- 01 Movie Pass, applied to 01 movie ticket at any special cinemas GOLD CLASS, 4DX, IMAX, SCREENX, ULTRA 4DX, STARIUM, PREMIUM CINEMA, CINE &amp; FORÊT, CINE &amp; SUITE. Applicable for both Tet/Sneakshow/Early Release, can be applied directly at the counter (expiry date is December 31, 2024 and can be used to book tickets for screenings until January 4, 2025).</ p>
+                    <p>In 2024, AFTER reaching the spending milestone of 8,000,000 VND, for every subsequent 1,000,000 VND spent, VVIP MEMBER will receive 01 free unlimited 2D/3D ticket.</p>
+                    <p>For example: In 2024, VVIP members who accumulate spending up to 9,000,000 VND will receive 01 2D/3D ticket. And when you accumulate spending up to 10,000,000 VND, you will receive 01 additional 2D/3D ticket,...</p>
+                    <p><strong>Note:</strong> Free tickets will be added to your account within 24 hours after accumulated spending is recorded. Free tickets are valid for 3 months from the date they are added to the member account.</p>
+                    <p><strong>Note:</strong></p>
+                    <p>- VVIP membership level and accompanying incentives are only valid until December 31, 2024.</p>
+                    <p>2D/3D movie ticket offers are NOT applicable at special cinemas: 4DX, ULTRA 4DX, IMAX, GOLD CLASS, SWEETBOX, STARIUM, L’AMOUR, PREMIUM, SCREENX, CINE &amp; FORÊT, CINE &amp; LIVING ROOM, as well as NOT applicable to Early Shows and Special Shows.</p>
+                    <p>- 2D/3D movie ticket incentives do not apply to holidays and New Year, except for 2D/3D tickets during the birthday month</p>
+                    <p>To improve member account security:</p>
+                    <p>- When making transactions using bonus points or free tickets directly at the theater, customers please present their member account (hard card or online account) and identification documents or other documents. Can show date of birth (original or photo) for theater staff to authenticate the member account owner. Theater staff has the right to refuse a customer's request if the customer cannot provide a membership account and/or documents specified herein or the information provided by the Customer does not match each other. Performing transactions using reward points or free tickets on CinemaHub's website is always assumed to be used by the member account holder. Customers are obliged to keep their Member accounts confidential. CinemaHub Vietnam will not entertain any complaints related to reward points if the transaction using such reward points is made online. <br>CinemaHub Vietnam will not refund and/or resolve used reward points if the Customer cannot prove that the Customer is not the person using the reward points and CinemaHub Vietnam's decision is final. same.</p>
+                    <p>- When buying tickets online and paying with points, coupons, vouchers, Premium cards, membership cards, gift cards, the system will ask you to enter the payment password.</p>
+                    `;
+            } else if (index === 3) {
+                content = `
+                    <h4>ACCOUNT MANAGEMENT</h4>
+                    <br>
+                    <p>Log in to CinemaHub Account, you can easily manage your member account like:</p>
+                    <p>- Check and edit account information.</p>
+                    <p>- Look up bonus points, total spending and transaction history.</p>
+                    <p>- Check available gift cards, vouchers or coupons in your member account.</p>
+                    <p>Each week, members will receive the CinemaHub Cinema Newsletter via email, updating the latest news on movies, events and promotions. Update your email, phone and address now to always receive the latest notifications from CinemaHub!</p>
+                    `;
+            } else if (index === 4) {
+                content = `
+                    <h4>SUPPORT</h4>
+                    <br>
+                    <p>With attractive incentives from the membership program, CinemaHub hopes to bring you experiences beyond cinema.</p>
+                    <p>If you have any questions about the membership program, you can immediately contact our Customer Support Department via email hoidap@cinemahub.vn or hotline 1900 6017 (8:00 - 22:00, from Monday to Sunday - including holidays and Tet).</p>
+                    <p>Thank you for always accompanying CinemaHub!</p>                    `;
+            }
+            contentBox.innerHTML = content;
+        }
+        function zoomIn(element) {
+            element.style.transform = 'scale(1.1)';
+        }
+
+        function zoomOut(element) {
+            element.style.transform = 'scale(1)';
+        }
+    </script>
+}

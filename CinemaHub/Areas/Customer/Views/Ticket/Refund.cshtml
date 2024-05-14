@@ -1,0 +1,60 @@
+﻿@model Ticket
+<div class="container mt-5" style="min-height:640px">
+    <div class="row">
+        <!-- Policy Section -->
+        <div class="col-md-6">
+            <h1 class="text-center mb-4">Refund Policy</h1>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Refund Policy Details:</h3>
+                    <p>
+                        Our refund policy ensures that customers have the opportunity to request a refund for their ticket purchases under certain conditions.<strong> Please review the following policy details:</strong>
+                    </p>
+                    <ul>
+                        <li><strong>Refunds can only be requested before the scheduled showtime of the movie at least 1 hour.</strong></li>
+                        <li><strong>Refunds are subject to a deduction of 20% of the ticket price as a processing fee.</strong></li>
+                        @* <li>Refunds will be processed within 7-10 business days of the request.</li> *@
+                        <li>Refunds will be issued in the form of <strong>user points</strong>, which can be used for future purchases on our platform.</li>
+                    </ul>
+                    <p>
+                        An email confirmation will be sent to the provided email address upon successful submission of the refund request.
+                    </p>
+                    <p>Thank you for using our services.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Refund Request Form Section -->
+        <div class="col-md-6">
+            <h1 class="text-center mb-4">Request Refund</h1>
+            <div class="card">
+                <div class="card-body">
+                    <form id="refundForm" asp-action="Refund" asp-controller="Ticket">
+                        <div class="form-group mt-2">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" class="form-control" name="fullName" value="@Model.AppUser.LastName @Model.AppUser.FirstName" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" name="email" value="@Model.AppUser.Email" placeholder="Enter your email" required readonly>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="ticketId">Ticket ID</label>
+                            <input class="form-control" name="ticketId" value="@Model.TicketID" readonly/>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="reason">Reason for Refund</label>
+                            <textarea class="form-control" name="reason" rows="3" placeholder="Enter your reason" required></textarea>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" value="" id="policyCheck" required>
+                            <label class="form-check-label" for="policyCheck">
+                                I have read and accept the refund policy.
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-warning mt-2">Submit Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

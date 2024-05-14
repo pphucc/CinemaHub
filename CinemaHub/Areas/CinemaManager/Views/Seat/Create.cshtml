@@ -1,0 +1,94 @@
+﻿@model Seat
+
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">New Seat</h3>
+    <hr />
+    <form method="post" asp-action="Create" asp-controller="Seat">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="addType" id="addSingle" value="single" checked>
+            <label class="form-check-label" for="addSingle">
+                Add Single Seat
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="addType" id="addMultiple" value="multiple">
+            <label class="form-check-label" for="addMultiple">
+                Add Multiple Seats
+            </label>
+        </div>
+
+        <div id="singleSeat" style="display:block;">
+            <table class="table">
+                <!-- Your existing single seat form content here -->
+                <tbody>
+                    <tr>
+                        <th scope="row"><label class="form-label">Room Name</label></th>
+                        <td>
+                            <input asp-for="RoomID" class="form-text" value="@ViewData["room_id"]" hidden readonly />
+                            <span>@ViewData["room_name"]</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label asp-for="SeatName" class="form-label"></label></th>
+                        <td>
+                            <input asp-for="SeatName" class="form-control w-25" value="Seat Name" />
+                            <span asp-validation-for="SeatName" class="text-danger"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label asp-for="SeatStatus" class="form-label"></label></th>
+                        <td>
+                            <select asp-for="SeatStatus" class="form-control w-25">
+                                <option value="AVAILABLE" style="color: green;">Available</option>
+                                <option value="LOCKED" style="color: red;">Locked</option>
+                            </select>
+                            <span asp-validation-for="SeatStatus" class="text-danger"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="multipleSeats" style="display:none;" class="mb-3">
+            <div class="form-group">
+                <label for="rowName">Row Name:</label>
+                <input type="text" class="form-control" id="rowName" name="rowName" placeholder="Enter Row Name">
+            </div>
+            <div class="form-group">
+                <label for="numberOfSeats">Number of Seats:</label>
+                <input type="number" class="form-control" id="numberOfSeats" name="numberOfSeats" min="1" value="1">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-controller="Seat" asp-action="RoomSeats" asp-route-room_id="@ViewData["room_id"]" class="btn btn-secondary">View Room's Seats</a>
+            @if (!string.IsNullOrEmpty(ViewData["errorMsg"] as string))
+            {
+                <a class="btn btn-info" asp-controller="Room" asp-action="Update" asp-route-room_id="@ViewData["room_id"]">Update Room</a>
+            }
+        </div>
+    </form>
+
+</div>
+
+@*Validate on client side*@
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+    <script>
+        // Show/hide relevant form fields based on selected option
+        $('input[type=radio][name=addType]').change(function () {
+            if (this.value === 'single') {
+                $('#singleSeat').show();
+                $('#multipleSeats').hide();
+            }
+            else if (this.value === 'multiple') {
+                $('#singleSeat').hide();
+                $('#multipleSeats').show();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,246 @@
+﻿@model Ticket
+@{
+    var seats = ViewData["Seats"] as IEnumerable<Seat>;
+}
+<style>
+    .seat-block {
+        width: 45px;
+        height: 45px;
+        border: 1px solid #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .seat-block-guid {
+        width: 45px;
+        height: 45px;
+        border: 1px solid #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .seat-block.available:hover {
+        cursor: pointer;
+        background-color: #ffc107;
+        color:black;
+        transition-delay: 0.2s;
+    }
+
+    .available {
+        background-color: #000; /* Change this to your desired color for selected seats */
+        color: #ffc107;
+    }
+
+    .selected {
+        background-color: #ffc107; /* Change this to your desired color for selected seats */
+        color: #000;
+    }
+
+    .unavailable {
+        background-color: #ccc;
+        color: #000;
+    }
+</style>
+<div class="container mt-5" style="min-height:840px">
+
+    
+
+    <h3 class="text-dark"> Please choose your favorite seats</h3><hr />
+
+    <div class="table-responsive">
+        <!-- Display Room Layout-->
+        <table class="table table-bordered w-100 text-center">
+            <thead>
+                <tr>
+                    <th colspan="100%" class="align-content-center">
+                        <div class="d-flex justify-content-center text-black">
+                            <hr style="height: 20px; width: 50%;" />
+
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    @*<th></th>*@
+                    @{
+                        int maxCol = 0;
+                        if (seats.Count() > 0)
+                        {
+                            maxCol = seats.Max(s => int.Parse(s.SeatName.Substring(1)));
+                        }
+
+                        @*for (int col = 1; col <= maxCol; col++)
+                    {
+                    <th>@col</th>
+                    }*@
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    var rowLetters = seats.Select(s => s.SeatName.Substring(0, 1)).Distinct().OrderBy(c => c);
+                }
+
+                @foreach (var rowLetter in rowLetters)
+                {
+                    <tr class="">
+                        @for (int col = 1; col <= maxCol; col++)
+                        {
+                            var seat = seats.FirstOrDefault(s => s.SeatName == rowLetter + col);
+                            var seatId = seat != null ? seat.SeatID : Guid.Empty;
+                            <td>
+                                @if (seat != null)
+                                {
+                                    var showtimeID = ViewData["ShowtimeID"] as string;
+                                    if (seat.SeatStatus.ToLower() == "locked")
+                                    {
+                                        <div class="seat-block w-100 unavailable" id="@(seatId)">
+                                            <span>@(rowLetter + col)</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="seat-block w-100  @(!seat.SeatStatus.ToLower().Contains(showtimeID.ToLower()) || seat.SeatStatus.ToLower() == "available" ? "available" : "unavailable")" id="@(seatId)">
+                                            <span>@(rowLetter + col)</span>
+                                        </div>
+                                    }
+
+                                }
+
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-end my-4">
+
+        <button class="btn btn-process px-5" disabled style="background-color:#ffc107; color:#000">Process</button>
+
+    </div>
+    <table class="table table-bordered text-center  mt-5" style="width:15%">
+        <tr>
+            <td class="w-25">
+                <div class="seat-block-guid available">
+                </div>
+            </td>
+            <td class="text-lg-start">
+                Available seat
+            </td>
+            <td>
+                <div class="seat-block-guid unavailable">
+                </div>
+            </td>
+            <td class="text-lg-start ">
+                Unavailable seat
+            </td>
+        </tr>
+    </table>
+</div>
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    
+    <script type="text/javascript">
+
+
+        var selectedSeats = [];
+
+        $(document).ready(function () {
+
+            $('.seat-block.available').click(function () {
+
+                $(this).toggleClass('selected');
+                var seatId = $(this).attr('id');
+
+                if ($(this).hasClass('selected')) {
+                    selectedSeats.push(seatId); // Add selected seat to the array
+                } else {
+                    var index = selectedSeats.indexOf(seatId);
+                    if (index !== -1) {
+                        selectedSeats.splice(index, 1); // Remove deselected seat from the array
+                    }
+                }
+                var processButton = $('.btn-process');
+                if (selectedSeats.length === 0) {
+                    // If no seats are selected, disable the button
+                    processButton.prop('disabled', true);
+                } else {
+                    // If seats are selected, enable the button
+                    processButton.prop('disabled', false);
+                }
+
+                CallAjax(this);
+            });
+
+
+        });
+
+        function CallAjax(seatSelected) {
+            var urlParams = new URLSearchParams(window.location.search);
+            var showtime_id = urlParams.get('showtime_id');
+            url = '/Customer/Ticket/GetSeatStatuses?showtime_id=' + showtime_id;
+            // Make an AJAX request to fetch updated seat statuses
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function (data) {
+                    // Update seat statuses based on the response
+                    data.forEach(function (seat) {
+                        var seatElement = $('#' + seat.seatID);
+                        if (seatElement.length && seat.seatStatus.toLowerCase() === "available") {
+                            seatElement.removeClass('unavailable').addClass(seat.seatStatus.toLowerCase());
+
+                        } else if (seat.seatID == $(seatSelected).attr('id')) {
+                            var index = selectedSeats.indexOf(seat.seatID);
+                            if (index !== -1) {
+                                selectedSeats.splice(index, 1); // Remove deselected seat from the array
+                            }
+
+                            alert("Seat " + seat.seatName + " is choosen by another people. Please choose another seat.");
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+        }
+
+        $(".btn-process").click(function () {
+
+            selectedSeats.forEach(function (seatId) {
+                var seat = $('#' + seatId);
+                CallAjax(seat);
+            });
+
+            var urlParams = new URLSearchParams(window.location.search);
+            var showtime_id = urlParams.get('showtime_id');
+
+            // Create a form element
+            var form = document.createElement('form');
+            form.setAttribute('method', 'POST');
+            form.setAttribute('action', '/Customer/Ticket/BookingConfirmation');
+
+            // Create hidden input fields for seatIDList and showtime_id
+            var seatIDListInput = document.createElement('input');
+            seatIDListInput.setAttribute('type', 'hidden');
+            seatIDListInput.setAttribute('name', 'seatIDs');
+            seatIDListInput.setAttribute('value', selectedSeats.toString());
+            form.appendChild(seatIDListInput);
+
+            var showtimeIDInput = document.createElement('input');
+            showtimeIDInput.setAttribute('type', 'hidden');
+            showtimeIDInput.setAttribute('name', 'showtime_id');
+            showtimeIDInput.setAttribute('value', showtime_id);
+            form.appendChild(showtimeIDInput);
+
+            // Append the form to the body and submit it
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+    </script>
+
+}

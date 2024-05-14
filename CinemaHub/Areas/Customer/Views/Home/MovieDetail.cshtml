@@ -1,0 +1,379 @@
+﻿@model Movie
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+<style>
+    .comment {
+        margin-bottom: 20px;
+        border-left: 5px solid #000;
+        padding-left: 10px;
+    }
+
+    .comment-body {
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .comment-author {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .comment-date {
+        color: #6c757d;
+    }
+
+    .add-comment {
+        margin-top: 30px;
+    }
+
+        .add-comment textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+
+        .add-comment button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            .add-comment button:hover {
+                background-color: #0056b3;
+            }
+
+    .comment-section {
+        max-height: 300px; /* Adjust the max-height as needed */
+        overflow-y: auto;
+    }
+
+</style>
+<div class="container py-5 bg-light mt-5" style="min-height:640px">
+    <div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <video src="@Model.VideoUrl" type="video/mp4" class="video-element" controls style="width:100%; height:100%"></video>
+            </div>
+        </div>
+    </div>
+    <div class="text-primary">
+    </div>
+    <hr />
+    <div class="row px-xl-5">
+        <div class="col-lg-5 pb-5">
+            <div id="product-carousel" class="d-flex justify-content-center align-items-center" data-ride="carousel">
+                <div class="">
+                    <div class="active">
+                        <img class="img-fluid" src="@Model.ImageUrl" alt="Image" style="max-height:355px">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center my-3">
+                <button class="btn btn-trailer" data-bs-toggle="modal" data-bs-target="#trailerModal" style="height: 36px; background-color: #000; color:#ffc107; z-index:999">Trailer</button>
+            </div>              
+        </div>
+        <div class="col-lg-7 pb-5">
+            <h3 class="font-weight-semi-bold">@Model.MovieName.ToUpper()</h3>
+            <hr />
+            <div class="d-flex flex-column">
+                <div class="information">
+                    <p><strong>Director:</strong>  @Model.Director</p>
+                    <p><strong>Actors:</strong> @Model.Actor</p>
+                    <p><strong>Duration:</strong> @Model.Duration minutes</p>
+                    <p><strong>Release Date:</strong> @Model.ReleaseDate</p>
+                    <p><strong>Studio:</strong> @Model.Studio</p>
+                </div>
+            </div>
+            <hr />
+            <div class="d-flex">
+                <a asp-controller="Ticket" asp-action="Index" asp-route-movie_id="@Model.MovieID" class="btn w-50 mx-2 my-4 text-white" style="height: 36px; background-color: #c61118">
+                    <span>Book Now</span>
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-warning w-50 mx-2 my-4 text-dark bi bi-house" style="height: 36px;">
+                    <span>Home</span>
+                </a>
+
+
+            </div>
+
+        </div>
+    </div>
+    <div class="row px-xl-5">
+        <div class="row">
+            <div class="nav nav-tabs justify-content-center border-secondary mb-4">
+                <a class="nav-item nav-link active mx-2 text-dark" data-toggle="tab" href="#tab-pane-1">Description</a>
+                <a class="nav-item nav-link text-dark" data-toggle="tab" href="#tab-pane-2">Comment</a>
+
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-pane-1">
+                <h4>Description</h4>
+                    @Html.Raw(Model.Description)
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade" id="tab-pane-2">
+                <h4>Comments</h4>
+                    <div id="commentsSection" class="comment-section">
+                        <!-- Comments will be added dynamically here -->
+                        <div class="comment">
+                            <div class="comment-body">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <!-- Add Comment Form -->
+                        <div class="add-comment">
+                            <h4>Add a Comment</h4>
+
+                            <div class="form-group">
+                                <textarea id="commentInput" class="form-control" rows="3" placeholder="Write your comment here..."></textarea>
+                            </div>
+                            <button id="postCommentBtn" class="btn btn-dark">Submit</button>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="editCommentTextarea" rows="3"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEditCommentBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCommentModalLabel">Delete Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="deleteCommentTextarea" rows="3" disabled></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveDeleteCommentBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Handle click event of tab links
+            $('.nav-link').click(function () {
+                // Remove active class from all tab links
+                $('.nav-link').removeClass('active');
+                // Add active class to the clicked tab link
+                $(this).addClass('active');
+                // Get the target tab pane
+                var target = $(this).attr('href');
+                // Hide all tab panes
+                $('.tab-pane').removeClass('show active');
+                // Show the target tab pane
+                $(target).addClass('show active');
+            });
+        });
+    </script>
+    <script>
+        function loadComments(movieId) {
+            $.ajax({
+                url: '../Comment/GetComments',
+                method: 'GET',
+                data: { movieId: movieId },
+                success: function (response) {
+                    var comments = response.data;
+                    var currentUserId = response.user;
+                    var role = response.role;
+
+                    $('#commentsSection').empty();
+                    comments.forEach(function (comment) {
+                        var editIconHtml = '';
+                        var deleteIconHtml = '';
+
+                        if (comment.appUser.id === currentUserId || role === "cinemaManager" || role === "admin") {
+                            editIconHtml = `<i class="fas fa-edit edit-comment-icon" data-comment-id="${comment.commentID}"></i>`;
+                            deleteIconHtml = `<i class="fas fa-trash delete-comment-icon" data-comment-id="${comment.commentID}"></i>`;
+                        }
+
+                        var commentHtml = `
+                                         <div class="comment">
+                                            <div class="comment-body">
+                                                <p class="comment-author">${comment.appUser.lastName} ${comment.appUser.firstName}</p>
+                                                <p class="comment-text">${comment.content} <span class="text-success">${editIconHtml}</span> <span class="text-danger">${deleteIconHtml}</span></p>
+                                            </div>
+                                        </div>`;
+
+                        $('#commentsSection').append(commentHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading comments:', error);
+                }
+            });
+
+        }
+
+        $(document).on('click', '.edit-comment-icon', function () {
+            var commentId = $(this).data('comment-id');
+            var commentText = $(this).closest('.comment-body').find('.comment-text').text();
+            openEditCommentModal(commentId, commentText);
+        });
+
+        $(document).on('click', '.delete-comment-icon', function () {
+            var commentId = $(this).data('comment-id');
+            var commentText = $(this).closest('.comment-body').find('.comment-text').text();
+            openDeleteCommentModal(commentId, commentText);
+        });
+
+        function openEditCommentModal(commentId, commentText) {
+            var movieId = '@Model.MovieID.ToString()';
+            $('#editCommentModal').modal('show');
+            $('#editCommentTextarea').val(commentText);
+
+            $('#saveEditCommentBtn').off('click').on('click', function () {
+                var newText = $('#editCommentTextarea').val();
+
+                if (newText.trim() !== '') {
+                    $.ajax({
+                        url: '../Comment/UpdateComment',
+                        method: 'POST',
+                        data: { commentId: commentId, newText: newText },
+                        success: function () {
+                            $('#editCommentModal').modal('hide');
+                            toastr.options = {
+                                "closeButton": true
+                            }
+                            toastr.success('Comment edited successfully.');
+                            loadComments(movieId);
+                        },
+                        error: function (xhr, status, error) {
+                            toastr.options = {
+                                "closeButton": true
+                            }
+                            toastr.error('Error editing comment:' + error);
+                            //console.error('Error editing comment:', error);
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '../Comment/DeleteComment',
+                        method: 'POST',
+                        data: { commentId: commentId },
+                        success: function () {
+                            $('#editCommentModal').modal('hide');
+                            toastr.options = {
+                                "closeButton": true
+                            }
+                            toastr.success('Comment deleted successfully.');
+                            loadComments(movieId);
+                        },
+                        error: function (xhr, status, error) {
+                            toastr.options = {
+                                "closeButton": true
+                            }
+                            toastr.error('Error deleting comment:' + error);
+                            // console.error('Error deleting comment:', error);
+                        }
+                    });
+                }
+            });
+        }
+
+        function openDeleteCommentModal(commentId, commentText) {
+            var movieId = '@Model.MovieID.ToString()';
+            $('#deleteCommentModal').modal('show');
+            $('#deleteCommentTextarea').val(commentText);
+
+            $('#saveDeleteCommentBtn').off('click').on('click', function () {
+                $.ajax({
+                    url: '../Comment/DeleteComment',
+                    method: 'POST',
+                    data: { commentId: commentId },
+                    success: function () {
+                        $('#deleteCommentModal').modal('hide');
+                        toastr.options = {
+                            "closeButton": true
+                        }
+                        toastr.success('Comment deleted successfully.');
+                        loadComments(movieId);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting comment:', error);
+                    }
+                });
+
+            });
+        }
+
+
+
+        $(document).ready(function () {
+            var movieId = '@Model.MovieID.ToString()';
+            loadComments(movieId);
+
+            function addComment(movieId, commentText) {
+                if (commentText.trim() !== '') {
+                    $.ajax({
+                        url: '../Comment/AddComment',
+                        method: 'POST',
+                        data: { movieId: movieId, text: commentText },
+                        success: function () {
+                            loadComments(movieId);
+                            toastr.options = {
+                                "closeButton": true
+                            }
+                            toastr.success('Comment added successfully.');
+                            $('#commentInput').val('');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error adding comment:', error);
+                        }
+                    });
+                }
+            }
+
+            $('#postCommentBtn').click(function () {
+                var commentText = $('#commentInput').val();
+                addComment(movieId, commentText);
+            });
+
+            $('#commentInput').keypress(function (event) {
+                if (event.which === 13) { // Enter
+                    var commentText = $('#commentInput').val();
+                    addComment(movieId, commentText);
+                }
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,33 @@
+﻿@model Cinema
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">New Cinema</h3>
+    <hr />
+    <form method="post" asp-action="Update" asp-controller="Cinema">
+        <div class="row">
+            <input  asp-for="@Model.CinemaID" hidden/>
+            <div class="col-12 my-3">
+                <label asp-for="@Model.CinemaName" class="form-label">Cinema Name</label>
+                <input type="text" asp-for="@Model.CinemaName" class="form-control">
+                <span asp-validation-for="@Model.CinemaName" class="text-danger"></span>
+
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Address">Address</label>
+                <textarea asp-for="@Model.Address" rows="3" class="form-control"> </textarea>
+                <span asp-validation-for="@Model.Address" class="text-danger"></span>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark my-3">Update</button>
+        <a asp-controller="Cinema" asp-action="Index" class="btn btn-secondary my-3" style="width:200px">
+            Back to Cinema list
+        </a>
+    </form>
+</div>
+
+
+@*Validate on client side*@
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

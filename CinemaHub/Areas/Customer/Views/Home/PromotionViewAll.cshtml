@@ -1,0 +1,54 @@
+﻿@model IEnumerable<Promotion>
+<style>
+	body{
+		background-color: #333333
+	}
+	.time {
+		text-align: center;
+		border-radius: 5px;
+		margin-top: 20px;
+		border: 2px inset #b1154a;
+		background-color: #dbdbd9;
+		line-height: 1.5;
+		font-size: 16px;
+	}
+
+	.info {
+		margin-top: 4%;
+	}
+
+	.home-title {
+		text-align: center;
+	}
+
+		.home-title .title-new-offer-vn {
+			border-radius: 5px;
+			color: aliceblue;
+			background-color: #000000;
+			border: 6px dotted #b1154a;
+		}
+</style>
+<div class="container my-5" style="min-height:600px">
+	<div class="home-title">
+		<h2 class="title-new-offer-vn">NEWS - PROMOTION</h2>
+	</div>
+	<div class="row">
+		@foreach (var promotion in Model)
+		{
+			<div class="col-md-3">
+				<div class="info">
+					<a href="@Url.Action("PromotionDetail", "Home", new { id = promotion.PromotionID })">
+						<div class="image-zoom d-flex justify-content-center align-items-center">
+							<img src="@promotion.ImageUrl" class="d-block w-100" alt="Image" style="border-radius: 10px; height:250px; width:160px;">
+						</div>
+					</a>
+					<div class="time">
+						@promotion.StartDate.ToShortDateString() - @promotion.EndDate.ToShortDateString()
+					</div>
+				</div>
+
+
+			</div>
+		}
+	</div>
+</div>

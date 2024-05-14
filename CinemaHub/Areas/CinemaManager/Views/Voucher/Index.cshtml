@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Cinema>
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">Manage Voucher</h3>
+    <hr />
+    <div class="d-flex w-100 my-5 justify-content-end">
+        <a class="btn btn-dark mx-2" asp-controller="Voucher" asp-action="Create">
+            <i class="bi bi-plus-circle"></i>
+            Add new Voucher
+        </a>
+    </div>
+
+    <table id="voucherTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Quantity</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+    <div class="d-flex w-100 my-5 justify-content-start error-actions">
+        <a class="btn btn-warning mx-2" asp-area="Customer" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-house"></i> Back to Home
+        </a>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript" src="~/js/voucher.js"></script>
+
+}
+

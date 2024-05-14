@@ -1,0 +1,17 @@
+﻿using CinemaHub.DataAccess.Data;
+using CinemaHub.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CinemaHub.DataAccess.Repositories
+{
+	public class VoucherRepository : Repository<Voucher>
+	{
+		public VoucherRepository(AppDbContext db) : base(db)
+		{
+		}
+	}
+}

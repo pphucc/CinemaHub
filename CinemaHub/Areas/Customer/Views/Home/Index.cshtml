@@ -1,0 +1,249 @@
+﻿@model CinemaHub.Utils.PaginatedList<Movie>
+<style>
+
+	.image-zoom img {
+		display: block;
+		transition: all .3s ease;
+	}
+
+		.image-zoom img:hover {
+			transform: scale(1.1);
+		}
+
+	.image-zoom div {
+		display: block;
+		overflow: hidden;
+	}
+
+	.carousel-control-prev,
+	.carousel-control-next {
+		width: 50px;
+		height: 50px;
+		font-size: 1.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+
+	.carousel-control-prev {
+		left: 0;
+	}
+
+	.carousel-control-next {
+		right: 0;
+	}
+
+	.promotion_title {
+		position: relative;
+	}
+
+	.red-line {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 20%;
+		border-bottom: 2px solid red;
+	}
+
+	.home-title {
+		text-align: center;
+	}
+
+		.home-title .title-new-offer-vn {
+			font-family: 'Montserrat', sans-serif;
+			border-radius: 5px;
+			color: aliceblue;
+			background-color: #000000;
+			border: 6px dotted #b1154a;
+			animation: blink 1s infinite;
+			text-shadow: 2px 2px 2px #000;
+		}
+
+	}
+</style>
+
+<div style="background-color: #333333">
+	<!-- Carousel Start -->
+	<div>
+		<div class="carousel-header">
+			<div id="carouselId" class="carousel slide" data-bs-ride="carousel">
+				<ol class="carousel-indicators">
+					<li data-bs-target="#carouselId" data-bs-slide-to="0" class="active"></li>
+					<li data-bs-target="#carouselId" data-bs-slide-to="1"></li>
+					<li data-bs-target="#carouselId" data-bs-slide-to="2"></li>
+					<li data-bs-target="#carouselId" data-bs-slide-to="3"></li>
+
+				</ol>
+				<div class="carousel-inner" role="listbox">
+					<div class="carousel-item active">
+						<img src="~/img/GapLaiChiBauMovie.jpg" class="img-fluid" alt="Image">
+
+					</div>
+					<div class="carousel-item">
+						<img src="~/img/HoiChungTuoiThanhXuanMovie_LE_auto_x1.jpg" class="img-fluid" alt="Image">
+
+
+					</div>
+					<div class="carousel-item">
+						<img src="~/img/QuyThayDauMovie.jpg" class="img-fluid" alt="Image">
+
+					</div>
+					<div class="carousel-item">
+						<img src="~/img/DuneMovie.jpg" class="img-fluid" alt="Image">
+
+					</div>
+				</div>
+				<button class="carousel-control-prev" type="button" data-bs-target="#carouselId" data-bs-slide="prev">
+					<span class="carousel-control-prev-icon btn bg-black" aria-hidden="false"></span>
+					<span class="visually-hidden">Previous</span>
+				</button>
+				<button class="carousel-control-next" type="button" data-bs-target="#carouselId" data-bs-slide="next">
+					<span class="carousel-control-next-icon btn bg-dark" aria-hidden="false"></span>
+					<span class="visually-hidden">Next</span>
+				</button>
+			</div>
+		</div>
+		<!-- Carousel End -->
+		<!--Promotion Start -->
+	</div>
+	@{
+		var promotions = ViewData["promotionData"] as IEnumerable<Promotion>;
+		var totalCount = promotions.Count();
+
+	}
+
+	<div class="container blog py-5">
+
+		<div class="home-title">
+			<h2 class="title-new-offer-vn">NEWS - PROMOTION</h2>
+		</div>
+		<div id="carouselExampleInterval" class="carousel slide" data-bs-ride="carousel">
+			<div class="carousel-inner">
+				@for (var i = 0; i < Math.Ceiling((double)promotions.Count() / 4); i++)
+				{
+					var startIndex = i * 4;
+					var slidePromotions = promotions.Skip(startIndex).Take(4);
+
+					if (startIndex + 4 > promotions.Count())
+					{
+						var remaining = 4 - (promotions.Count() - startIndex);
+						slidePromotions = slidePromotions.Concat(promotions.Take(remaining));
+					}
+
+					<div class="carousel-item @(i == 0 ? "active" : "")" data-bs-interval="10000">
+						<div class="row">
+							@foreach (var p in slidePromotions)
+							{
+								<div class="col">
+									<a href="@Url.Action("PromotionDetail", "Home", new { id = p.PromotionID })">
+										<div class="image-zoom d-flex justify-content-center align-items-center">
+											<img src="@p.ImageUrl" class="d-block w-100" alt="Image" style="border-radius: 10px; height:250px; width:160px;">
+										</div>
+									</a>
+
+
+								</div>
+							}
+						</div>
+					</div>
+				}
+			</div>
+
+			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Previous</span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Next</span>
+			</button>
+		</div>
+	</div>
+
+	<!--Promotion End-->
+	<!-- Blog Start -->
+	<div id="#movie" class="container-fluid blog py-5">
+		<div class="container py-5">
+			<div class="home-title">
+				<h2 class="title-new-offer-vn">TRENDING MOVIES</h2>
+			</div>
+			<div class="row d-flex justify-content-between my-5">
+				@foreach (var movie in Model)
+				{
+					<div class="col-lg-2 g-0 col-md-6">
+						<div class="blog-item d-flex justify-content-center" data-movie-id="@movie.MovieID">
+							<div class="blog-img">
+								<div class="blog-img-inner  position-relative">
+									<img class="img-fluid" src="@movie.ImageUrl" alt="Image" style="height:355px; width:240px;">
+									<div class="position-absolute bottom-0 start-50 translate-middle-x d-none flex-column justify-content-between w-100 btn-list-@movie.MovieID" style="background-color: rgba(0,0,0,0.6)">
+										<div class="movie-name mx-2 my-2 d-flex justify-content-center">
+											<h5 class="text-white">@movie.MovieName</h5>
+										</div>
+										<div class="d-flex justify-content-between">
+											<a asp-area="Customer" asp-controller="Ticket" asp-action="Index" asp-route-movie_id="@movie.MovieID" class="btn w-50 mx-2 my-4" style="height: 36px; background-color: black; color:#ffc107;">
+												<span>Book</span>
+											</a>
+											<a asp-area="Customer" asp-controller="Home" asp-action="MovieDetail" asp-route-movie_id="@movie.MovieID" class="btn w-50 mx-2 my-4" style="height: 36px;background-color: black; color:#ffc107;">
+												<span>View</span>
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+
+			</div>
+			@{
+				var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+				var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+			}
+			<div class="d-flex justify-content-center align-items-center mt-5">
+				<a asp-action="Index"
+				   asp-route-pageNumber="@(Model.PageIndex - 1)"
+				   class="btn btn-warning @prevDisabled mx-2 text-white " style="background: #000	">
+					Prev
+				</a>
+				<a asp-action="Index"
+				   asp-route-pageNumber="@(Model.PageIndex + 1)"
+				   class="btn btn-warning @nextDisabled mx-2 text-white" style="background: #000">
+					Next
+				</a>
+			</div>
+		</div>
+	</div>
+	<!-- Blog End -->
+</div>
+@section Scripts {
+	<script type="text/javascript">
+		$(".blog-item").hover(function () {
+			var id = $(this).attr("data-movie-id");
+			$(`.btn-list-${id}`).removeClass("d-none").addClass("d-flex");
+
+		}, function () {
+			var id = $(this).attr("data-movie-id");
+			$(`.btn-list-${id}`).removeClass("d-flex").addClass("d-none");
+		})
+		function blinkTitle() {
+			var titles = document.querySelectorAll('.title-new-offer-vn');
+
+			setInterval(function () {
+				titles.forEach(function (title) {
+					if (title.style.backgroundColor === 'rgb(0, 0, 0)') {
+						title.style.backgroundColor = '#ffa500';
+					} else {
+						title.style.backgroundColor = '#000000';
+					}
+				});
+			}, 1000); // Thời gian mỗi chu kỳ (ms)
+		}
+
+		// Gọi hàm blinkTitle để bắt đầu hiệu ứng
+		blinkTitle();
+
+
+
+	</script>
+}

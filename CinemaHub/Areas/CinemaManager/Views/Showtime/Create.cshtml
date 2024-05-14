@@ -1,0 +1,247 @@
+﻿@model CinemaHub.Models.ViewModels.ShowtimeVM
+<style>
+
+    .container-custome {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    .text-primary {
+        color: #007bff;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .form-label {
+        margin-bottom: 5px;
+    }
+
+    .form-control-custome {
+        font-size: 15px;
+        padding: 15px;
+        margin-bottom: 20px;
+        width: 100%;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #timeNow {
+        font-size: 24px;
+        font-family: Arial, sans-serif;
+        color: #333;
+        text-shadow: 1px 1px 2px #aaa;
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+</style>
+
+<div class="container container-custome my-5" style="min-height:840px">
+    <h3 class="text-dark">New Showtime</h3>
+    <hr />
+    <form method="post" asp-action="Create" asp-controller="Showtime">
+        <div class="row">
+
+            <div class="col-12" onload="displayTime()">
+                <h3><span id="timeNow">Time now:</span></h3>
+            </div>
+
+            <div class="col-12">
+                <div class="my-3">
+                    <label asp-for="@Model.Showtime.Date" class="form-label">Date (mm/dd/yyyy) </label>
+                    <input asp-for="@Model.Showtime.Date" type="date" class="form-control form-control-custome">
+                    <span asp-validation-for="@Model.Showtime.Date" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="my-3 col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <label asp-for="@Model.Showtime.Time" class="form-label">Hour</label>
+                            <input asp-for="@Model.Showtime.Time" max="23" min="0" class="form-control form-control-custome">
+                            <span asp-validation-for="@Model.Showtime.Time" class="text-danger"></span>
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="@Model.Showtime.Minute" class="form-label">Minute</label>
+                            <input asp-for="@Model.Showtime.Minute" max="59" min="0" class="form-control form-control-custome">
+                            <span asp-validation-for="@Model.Showtime.Minute" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Movie -->
+                <div class="col-12">
+                    <div class="my-3">
+                        <label asp-for="@Model.Showtime.MovieID" class="form-label">Movie</label>
+                        <select asp-for="@Model.Showtime.MovieID" asp-items="@Model.MovieList" class="form-control form-control-custome"></select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <!-- Cinema -->
+                <div class="my-3 col-md-6">
+                    <label class="ms-2">Cinema:</label>
+                    <select id="cinemaSelectList" asp-items="@Model.CinemaList" class="form-control form-control-custome"></select>
+                </div>
+                <!-- Room -->
+                <div class="my-3 col-md-6">
+                    <label class="ms-2">Room:</label>
+                    <select id="roomSelectList" asp-for="@Model.Showtime.RoomID" asp-items="@Model.RoomList" class="form-control form-control-custome"></select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark my-3">Create</button>
+        <a asp-controller="Showtime" asp-action="Index" class="btn btn-secondary my-3" style="width:200px">
+            Back to Showtime list
+        </a>
+    </form>
+
+</div>
+
+
+
+@*Validate on client side*@
+@section Scripts {
+
+    @* <script type="text/javascript" src="~/js/showtime.js"></script> *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    <script type="text/javascript">
+        var selectCinema = document.getElementById("cinemaSelectList");
+        var selectRoom = document.getElementById("roomSelectList");
+
+        $(document).ready(function () {
+            loadroomlist(selectCinema.value);
+        });
+
+
+        selectCinema.addEventListener("change", function () {
+            var cinema_id = selectCinema.value;
+            console.log("change");
+            loadroomlist(cinema_id);
+        });
+
+
+        function loadroomlist(cinemaid) {
+            var url = "/CinemaManager/Showtime/GetRoomList?cinema_id=" + cinemaid;
+            console.log(url);
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var selectelement = selectRoom;
+                    selectelement.innerHTML = ""; // Clear previous options
+                    var roomList = data.data; // Access the 'data' property from the JSON response
+                    roomList.forEach(item => {
+                        var option = document.createElement("option");
+                        option.text = item.roomName;
+                        option.value = item.roomID;
+                        selectelement.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error: ", error);
+                });
+        }
+        $(document).ready(function () {
+            var currentDate = new Date().toISOString().slice(0, 10);
+
+            $("form").submit(function () {
+                var showtimeDate = $("#Showtime_Date").val();
+
+                if (showtimeDate < currentDate) {
+                    toastr.options = {
+                        "closeButton": true
+                    }
+                    toastr.error('The showtime creation date cannot be less than the current date');
+                    // alert("The showtime creation date cannot be less than the current date");
+                    return false;
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            var currentDate = new Date();
+
+            $("form").submit(function () {
+                var selectedDate = $("#Showtime_Date").val(); // Lấy ngày tạo suất chiếu từ input
+                var selectedHour = parseInt($("#Showtime_Time").val()); // Lấy giờ tạo suất chiếu từ input
+                var selectedMinute = parseInt($("#Showtime_Minute").val()); // Lấy phút tạo suất chiếu từ input
+
+                // Tạo đối tượng Date từ ngày tạo suất chiếu và thời gian hiện tại
+                var selectedDateTime = new Date(selectedDate);
+                selectedDateTime.setHours(selectedHour, selectedMinute);
+
+                if (selectedDateTime < currentDate) {
+                    // Kiểm tra nếu ngày tạo suất chiếu nhỏ hơn ngày hiện tại
+                    // alert("Show time must be greater than the current time.");
+                    toastr.options = {
+                        "closeButton": true
+                    }
+                    toastr.error('Show time must be greater than the current time.');
+                    return false;
+                }
+            });
+        });
+
+
+        $(document).ready(function () {
+
+            displayTime();
+
+            // Function to display current time
+            function displayTime() {
+                const t = new Date();
+                let h = t.getHours();
+                let m = t.getMinutes();
+                let s = t.getSeconds();
+
+                // Format minutes and seconds to have leading zero if less than 10
+                m = formatTwoNumber(m);
+                s = formatTwoNumber(s);
+
+                // Display time in the element with id "timeNow"
+                document.getElementById("timeNow").innerHTML = h + ":" + m + ":" + s;
+
+                // Call displayTime() function again after 1000 milliseconds (1 second)
+                setTimeout(displayTime, 1000);
+            }
+
+            function formatTwoNumber(x) {
+                if (x < 10) {
+                    x = "0" + x;
+                }
+                return x;
+            }
+
+        });
+
+
+    </script>
+
+}
+

@@ -1,0 +1,63 @@
+﻿@using CinemaHub.Areas.Admin.Views.ViewModels
+@model CinemaManagerVM
+<div class="content">
+    <div class="container my-5">
+        <h3 class="text-primary">Create Manager Profile</h3>
+        <hr />  
+        <form asp-controller="Dashboard" asp-action="CreateManagerAccount" method="post" class="row g-3" enctype="multipart/form-data">
+            <div class="col-md-6">
+                <label asp-for="@Model.CinemaManager.Email" class="form-label">Email</label>
+                <input asp-for="@Model.CinemaManager.Email" class="form-control" id="inputEmail4">
+                <span asp-validation-for="@Model.CinemaManager.Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="@Model.CinemaManager.PhoneNumber" class="form-label">Phone</label>
+                <input asp-for="@Model.CinemaManager.PhoneNumber" class="form-control" id="inputEmail4">
+                <span asp-validation-for="@Model.CinemaManager.PhoneNumber" class="text-danger"></span>
+
+            </div>
+            <div class="col-md-6">
+                <label asp-for="@Model.Password"  class="form-label">Password</label>
+                <input asp-for="@Model.Password" type="password" class="form-control" id="inputPassword4">
+                <span asp-validation-for="@Model.Password" class="text-danger"></span>
+
+            </div>
+            <div class="col-md-6">
+                <label asp-for="@Model.ConfirmPassword" class="form-label">Confirm Password</label>
+                <input asp-for="@Model.ConfirmPassword" type="password" class="form-control" id="inputPassword4">
+                <span asp-validation-for="@Model.ConfirmPassword" class="text-danger"></span>
+
+            </div>
+            <div class="col-md-6">
+                <label asp-for="@Model.CinemaManager.FirstName" class="form-label">First Name</label>
+                <input asp-for="@Model.CinemaManager.FirstName" class="form-control" id="inputEmail4">
+                <span asp-validation-for="@Model.CinemaManager.FirstName" class="text-danger"></span>
+
+            </div>
+            <div class="col-md-6">
+                <label asp-for="@Model.CinemaManager.LastName" class="form-label">Last Name</label>
+                <input asp-for="@Model.CinemaManager.LastName" class="form-control" id="inputPassword4">
+            </div>
+            <div class="col-md-12">
+                <label asp-for="@Model.CinemaManager.DOB" class="form-label">DOB</label>
+                <input asp-for="@Model.CinemaManager.DOB" type="date" class="form-control" id="inputCity">
+                <span asp-validation-for="@Model.CinemaManager.DOB" class="text-danger"></span>
+
+            </div>
+            <div class="col-md-12">
+                <label asp-for="@Model.CinemaManager.Avatar" name="file" class="form-label">Avatar</label>
+                <input asp-for="@Model.CinemaManager.Avatar" type="file" name="file" class="form-control" id="inputCity">
+                <span asp-validation-for="@Model.CinemaManager.Avatar" class="text-danger"></span>
+
+            </div>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary mx-2">Create</button>
+                <a asp-action="Dashboard" asp-controller="Dashboard" class="btn btn-secondary mx-2">Back</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

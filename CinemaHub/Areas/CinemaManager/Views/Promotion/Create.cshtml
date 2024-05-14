@@ -1,0 +1,78 @@
+﻿@model Promotion
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">New Promotion</h3>
+    <hr />
+    <form method="post" asp-action="Create" asp-controller="Promotion" enctype="multipart/form-data">
+        <div class="row">
+            <div class="my-3">
+                <label asp-for="@Model.Topic" class="form-label">Topic name</label>
+                <input type="text" asp-for="@Model.Topic" class="form-control">
+                <span asp-validation-for="@Model.Topic" class="text-danger"></span>
+
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Content">Content</label>
+                <textarea asp-for="@Model.Content" rows="3" class="form-control"> </textarea>
+                <span asp-validation-for="@Model.Content" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.StartDate">Start Date</label>
+                <input asp-for="@Model.StartDate" rows="3" class="form-control"> </input>
+                <span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.EndDate">End Date</label>
+                <input asp-for="@Model.EndDate" rows="3" class="form-control"> </input>
+                <span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.ImageUrl">ImageUrl</label>
+                <input type="file" name="fileImage" asp-for="@Model.ImageUrl" rows="3" class="form-control" />
+                <span asp-validation-for="@Model.ImageUrl" class="text-danger"></span>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark my-3">Create</button>
+        <a asp-controller="Promotion" asp-action="Index" class="btn btn-secondary my-3" style="width:200px">
+            Back to Promotion list
+        </a>
+    </form>
+</div>
+
+
+@*Validate on client side*@
+@section Scripts {
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    <script type="text/javascript">
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+        });
+
+        $(document).ready(function () {
+            var currentDate = new Date();
+
+            $("form").submit(function () {
+                var selectedStartDate = new Date($("#StartDate").val());
+                var selectedEndDate = new Date($("#EndDate").val());
+
+                if (selectedEndDate < selectedStartDate) {
+                   // alert("End date must be greater than the start date.");
+                    toastr.options = {
+                        "closeButton": true
+                    }
+                    toastr.error('End date must be greater than the start date.');
+                    return false;
+                }
+            });
+        });
+
+
+
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}
+

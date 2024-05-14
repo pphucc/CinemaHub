@@ -1,0 +1,102 @@
+﻿@model Movie
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">New Movie</h3>
+    <hr />
+    <form method="post" asp-action="Update" asp-controller="Movie" enctype="multipart/form-data">
+        <div class="row">
+            <input asp-for="@Model.MovieID" hidden />
+            <div class="col-6 mt-5">
+                <label asp-for="@Model.MovieName" class="form-label">Movie Name</label>
+                <input type="text" asp-for="@Model.MovieName" class="form-control">
+                <span asp-validation-for="@Model.MovieName" class="text-danger"></span>
+            </div>
+            <div class="col-6 mt-5">
+                <label asp-for="@Model.Category" class="form-label">Category</label>
+                <input asp-for="@Model.Category" class="form-control">
+                <span asp-validation-for="@Model.Category" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Description">Description</label>
+                <textarea asp-for="@Model.Description" rows="3" class="form-control"> </textarea>
+                <span asp-validation-for="@Model.Description" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Actor" class="form-label">Actor Name</label>
+                <input type="text" asp-for="@Model.Actor" class="form-control">
+                <span asp-validation-for="@Model.Actor" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Director" class="form-label">Director Name</label>
+                <input type="text" asp-for="@Model.Director" class="form-control">
+                <span asp-validation-for="@Model.Director" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Price" class="form-label">Price</label>
+                <input type="text" asp-for="@Model.Price" class="form-control">
+                <span asp-validation-for="@Model.Price" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.ImageUrl">ImageUrl</label>
+                <input type="file" name="fileImage" asp-for="@Model.ImageUrl" rows="3" class="form-control">
+                <span asp-validation-for="@Model.ImageUrl" class="text-danger"></span>
+                <span class="text-danger">@ViewData["imageError"]</span>
+
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.VideoUrl">VideoUrl</label>
+                <input type="file" name="fileVideo" asp-for="@Model.VideoUrl" rows="3" class="form-control">
+                <span asp-validation-for="@Model.VideoUrl" class="text-danger"></span>
+                <span class="text-danger">@ViewData["videoError"]</span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Duration" class="form-label">Duration</label>
+                <input type="text" asp-for="@Model.Duration" class="form-control">
+                <span asp-validation-for="@Model.Duration" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.ReleaseDate">ReleaseDate</label>
+                <input asp-for="@Model.ReleaseDate" rows="3" class="form-control">
+                <span asp-validation-for="@Model.ReleaseDate" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.EndDate">EndDate</label>
+                <input asp-for="@Model.EndDate" rows="3" class="form-control">
+                <span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Country" class="form-label">Country Name</label>
+                <input type="text" asp-for="@Model.Country" class="form-control">
+                <span asp-validation-for="@Model.Country" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Studio" class="form-label">Studio Name</label>
+                <input type="text" asp-for="@Model.Studio" class="form-control">
+                <span asp-validation-for="@Model.Studio" class="text-danger"></span>
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Version" class="form-label">Version</label>
+                <input type="text" asp-for="@Model.Version" class="form-control">
+                <span asp-validation-for="@Model.Version" class="text-danger"></span>
+            </div>          
+        </div>
+        <button type="submit" class="btn btn-dark my-3">Update</button>
+        <a asp-controller="Movie" asp-action="Index" class="btn btn-secondary my-3" style="width:200px">
+            Back to Movie list
+        </a>
+    </form>
+</div>
+
+
+@*Validate on client side*@
+@section Scripts {
+    @{
+        <script type="text/javascript">
+            tinymce.init({
+                selector: 'textarea',
+                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+            });
+        </script>
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

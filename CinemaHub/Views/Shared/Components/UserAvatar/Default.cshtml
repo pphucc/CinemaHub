@@ -1,0 +1,22 @@
+﻿@model dynamic
+<style>
+    #avatar {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
+
+@if (@Model != null)
+{
+    if (!string.IsNullOrEmpty(Model.Avatar))
+    {
+        <img id="avatar" src="@Model.Avatar" alt="Alternate Text" />
+    }
+    else
+    {
+        <img id="avatar" src="~/images/avatar/DefaultAvatar.jpg" alt="Alternate Text" />
+
+    }
+}

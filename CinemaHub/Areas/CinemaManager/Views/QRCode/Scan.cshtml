@@ -1,0 +1,131 @@
+﻿<style>
+    .result {
+        background-color: green;
+        color: #fff;
+        padding: 20px;
+    }
+
+</style>
+
+<div class="container" style="min-height: 60vh; margin-top:5%;">
+
+    <div class="row">
+        <div class="col">
+            <div style="width:500px;" id="reader"></div>
+        </div>
+        <div class="col" style="padding:30px;">
+            <h4>SCAN RESULT</h4>
+            <div id="result" style="display:none;" class="mt-3 mb-3">Result Here</div>
+            <div id="result_done" class="mt-3 mb-3">Result Here</div>
+            <div id="msg" class="text-success"></div>
+            <div id="error" class="text-danger"></div>
+            <div class="row">
+                <button id="checkTicketBtn" class="btn btn-outline-warning mt-3 col-3" style="display:none;">Check Ticket</button>
+                <button id="checkInBtn" class="btn btn-outline-success mt-3 col-3" style="display:none;">Check In</button>
+                <button id="viewDetail" class="btn btn-outline-primary mt-3 col-3 mx-2" style="display:none;">View</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="qrCodeContent"></div> <!-- Placeholder for partial view content -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/js/qrcode.js"></script>
+
+    <script type="text/javascript">
+        function onScanSuccess(qrCodeMessage) {
+            document.getElementById('result').innerHTML = '<strong class="text-success mt-5">' + qrCodeMessage + '</strong>';
+            document.getElementById('result_done').innerHTML = '<strong class="text-success mt-5"><i class="fa fa-check" aria-hidden="true"></i> Scan Successfully.</strong>';
+            $('#msg').html('');
+            $('#error').html('');
+
+            $('#checkTicketBtn').show();
+            $('#checkInBtn').hide();
+            $('#viewDetail').hide();
+        }
+
+
+        function onScanError(errorMessage) {
+            //handle scan error
+        }
+
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
+
+
+        document.getElementById('checkTicketBtn').addEventListener('click', function () {
+            var qrCodeMessage = document.getElementById('result').textContent.trim();
+            $.ajax({
+                url: '/CinemaManager/QRCode/CheckTicket',
+                method: 'POST',
+                data: { ticket_id: qrCodeMessage },
+                success: function (response) {
+                    if (response.success) {
+                        $('#msg').html(response.message);
+                        $('#checkInBtn').show();
+                        $('#checkTicketBtn').hide();
+                    } else {
+                        $('#error').html(response.message);
+                    }
+                    $('#viewDetail').show();
+                },
+                error: function (xhr, status, error) {
+                    $('#error').html(error);
+                }
+            });
+        });
+
+
+        document.getElementById('checkInBtn').addEventListener('click', function () {
+            var qrCodeMessage = document.getElementById('result').textContent.trim();
+            $.ajax({
+                url: '/CinemaManager/QRCode/CheckInTicket',
+                method: 'POST',
+                data: { ticket_id: qrCodeMessage },
+                success: function (response) {
+                    if (response.success) {
+                        $('#msg').html(response.message);
+                        $('#checkInBtn').hide();
+                    } else {
+                        $('#error').html(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#error').html(error);
+                }
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('#viewDetail').click(function () {
+                var qrCodeMessage = document.getElementById('result').textContent.trim();
+
+                var ticketId = qrCodeMessage;
+                var url = '@Url.Action("ViewQRCode", "Ticket", new { area = "Customer" })' + '?ticketId=' + ticketId;
+
+                $('#qrCodeContent').load(url);
+
+                var qrCodeModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+                qrCodeModal.show();
+            });
+        });
+
+    </script>
+}

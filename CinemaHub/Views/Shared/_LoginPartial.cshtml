@@ -1,0 +1,50 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+<style>
+    .dropdown-item:focus, .dropdown-item:hover {
+        background-color: var(--bs-warning)
+    }
+</style>
+
+<div class="navbar-nav d-flex align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="nav-item " style="cursor:pointer; padding:0;">
+            @await Component.InvokeAsync("UserAvatar")
+        </div>
+
+        <div class="nav-item dropdown" style="margin-left:-50px;">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"></a>
+
+            <ul class="dropdown-menu m-0" aria-labelledby="navbarDropdown" style="background-color:#333">
+                <li>
+                    <a class="dropdown-item text-white" href="/Identity/Account/Manage">Profile</a>
+                </li>
+
+                <li>
+                    <a asp-area="Customer" asp-action="Index" asp-controller="Wallet" class="dropdown-item text-white">My Wallet</a>
+                </li>
+
+                <li>
+                    <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button id="logout" type="submit" class="dropdown-item text-white">Logout</button>
+                    </form>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+            </ul>
+        </div>
+
+    }
+    else
+    {
+        <div class="nav-item">
+            <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </div>
+    }
+</div>

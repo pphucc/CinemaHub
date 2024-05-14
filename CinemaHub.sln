@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaHub", "CinemaHub\CinemaHub.csproj", "{D2CB7899-A7CF-4C6B-B9D3-9B9B3EE252AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaHub.DataAccess", "CinemaHub.DataAccess\CinemaHub.DataAccess.csproj", "{3149B6D6-6EF5-40AB-9FD4-85FD9C5646CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaHub.Models", "CinemaHub.Models\CinemaHub.Models.csproj", "{CA50AE7D-9B13-488C-B08B-5893EB4583B4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2CB7899-A7CF-4C6B-B9D3-9B9B3EE252AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2CB7899-A7CF-4C6B-B9D3-9B9B3EE252AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2CB7899-A7CF-4C6B-B9D3-9B9B3EE252AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2CB7899-A7CF-4C6B-B9D3-9B9B3EE252AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3149B6D6-6EF5-40AB-9FD4-85FD9C5646CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3149B6D6-6EF5-40AB-9FD4-85FD9C5646CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3149B6D6-6EF5-40AB-9FD4-85FD9C5646CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3149B6D6-6EF5-40AB-9FD4-85FD9C5646CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA50AE7D-9B13-488C-B08B-5893EB4583B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA50AE7D-9B13-488C-B08B-5893EB4583B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA50AE7D-9B13-488C-B08B-5893EB4583B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA50AE7D-9B13-488C-B08B-5893EB4583B4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7D2D78FD-AE0C-4251-BF26-D9CDB3C1F815}
+	EndGlobalSection
+EndGlobal

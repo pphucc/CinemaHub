@@ -1,0 +1,8 @@
+﻿<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <img src="@ViewBag.QrCodeUri" class="img-thumbnail" id="qrCodeImage" />
+            <a href="@Url.Action("DownloadQRCode", new { ticketId = ViewBag.TicketId })" class="btn btn-outline-warning mt-2" download>Download QR Code</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+﻿@model AppUser
+
+<div class="container mt-5" style="min-height:640px">
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Your Points</h3>
+                    <p class="card-text">You currently have <strong>@Model.Point</strong> points in your account.</p>
+                    <p class="card-text">Points can be used to purchase tickets at our cinema.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Purchase Points</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Price</th>
+                                <th>Point</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>$1</td>
+                                <td>1000</td>
+                                <td><input type="radio" name="purchaseOption" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>$5</td>
+                                <td>5000</td>
+                                <td><input type="radio" name="purchaseOption" value="5"></td>
+                            </tr>
+                            <tr>
+                                <td>$10</td>
+                                <td>10500</td>
+                                <td><input type="radio" name="purchaseOption" value="10"></td>
+                            </tr>
+                            <tr>
+                                <td>$20</td>
+                                <td>21000</td>
+                                <td><input type="radio" name="purchaseOption" value="20"></td>
+                            </tr>
+                            <tr>
+                                <td>$40</td>
+                                <td>42000</td>
+                                <td><input type="radio" name="purchaseOption" value="40"></td>
+                            </tr>
+                            <tr>
+                                <td>$100</td>
+                                <td>105000</td>
+                                <td><input type="radio" name="purchaseOption" value="100"></td>
+                            </tr>
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+
+                    <button id="purchaseBtn" class="btn btn-primary btn-block" disabled>Purchase</button>
+                    <div id="purchaseResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Enable purchase button when a radio option is selected
+            $('input[type=radio][name=purchaseOption]').change(function () {
+                if (this.checked) {
+                    $('#purchaseBtn').prop('disabled', false);
+                }
+            });
+
+            // Purchase button click event
+            $('#purchaseBtn').click(function () {
+                var selectedOption = $('input[type=radio][name=purchaseOption]:checked');
+                if (selectedOption.length === 0) {
+                    return; // No option selected, do nothing
+                }
+
+                var points = selectedOption.closest('tr').find('td:nth-child(2)').text().trim();
+                var amount = selectedOption.val();
+
+                window.location.href = '/Customer/Payment/PurchasePoints?points=' + points + '&amount=' + amount;
+            });
+        });
+
+    </script>
+}
+

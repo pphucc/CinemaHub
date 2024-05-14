@@ -1,0 +1,263 @@
+﻿@model Ticket
+<style>
+    .movie-list {
+        max-height: 600px; /* Adjust the max-height as needed */
+        overflow-y: auto;
+    }
+
+    .active {
+        background-color: black;
+        color: #ffc107;
+    }
+
+    .showtime {
+        min-width: 86px;
+        height: auto;
+    }
+</style>
+<div class="container mt-5" style="min-height:840px">
+    <h3 class="text-dark"><i class="bi bi-film mx-4"></i>Booking Tickets</h3>
+    <hr />
+    <div class="row">
+        <div class="col-md-8 border border-dark left-panel">
+            <div id="daysList" class="row" style="min-height:64px">
+                <h5 class="text-dark d-flex notify-select mx-5 my-3">Please select a movie</h5>
+            </div>
+            <hr />
+            <div class="address-list" style="min-height:64px">
+            </div>
+            <hr />
+            <div class="showtime-list" style="min-height:64px">
+            </div>
+        </div>
+        <div class="col-md-4 border border-dark" style="overflow-y: auto; max-height: 600px;">
+            @foreach (var item in @ViewData["MovieList"] as IEnumerable<Movie>)
+            {
+                <div class="card mb-3 movie mt-1" style="max-width: 540px;" data-movieID="@item.MovieID" data-movieName="@item.MovieName">
+                    <div class="row g-0">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center">
+                            <img src="@item.ImageUrl" style="max-height:100px; width:100%; object-fit:cover" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">@item.MovieName</h5>
+                                @* <p class="card-text">@Html.Raw(item.Description)</p> *@
+                                <p class="card-text"><small class="text-muted">@item.Director</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row mt-5">
+        <h4 class="text-dark"><i class="bi bi-film mx-4"></i>Recommend for you</h4>
+        <hr />
+        <div class="row d-flex justify-content-start my-5 recommend-movies">
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+        let movieID = "";
+        let days;
+
+        // Check the any movie has been selected or not
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        movieID = urlParams.get("movie_id");
+
+        //Default border for this
+        var defaultMovieSelected = $('[data-movieID="' + movieID + '"]');
+        $(".movie").removeClass("border border-4 border-secondary");
+        defaultMovieSelected.addClass("border border-4 border-secondary");
+
+        function getDate(daysToAdd) {
+            var date = new Date();
+            date.setDate(date.getDate() + daysToAdd);
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            return day + '-' + month + '-' + year;
+        }
+
+        // Function to create a card HTML for a given day
+        function createCard(day) {
+            return `
+                                                                                    <div class="col-md-2">
+                                                                                        <div class="btn border border-primary my-2 mx-2 px-2 py-2 days ">
+                                                                                            ${day}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `;
+        }
+
+        // Function to generate cards for the showtimes date
+        function generateDayCards(MovieID) {
+            var daysListDiv = document.getElementById('daysList');
+            if (daysListDiv) {
+                var cardsHTML = '';
+                $.get(`/Customer/Ticket/GetShowtimeDatesForMovie?movie_id=${movieID}`, (data, status) => {
+                    if (status === "success" && data.dates.length > 0) {
+                        var cardsHTML = '<div class="mx-2 my-2"><h6>Dates:</h6></div>';
+                        data.dates.forEach(function (date) {
+                            var cardHTML = createCard(date);
+                            cardsHTML += cardHTML;
+                        });
+                        daysListDiv.innerHTML = cardsHTML;
+                    } else {
+                        daysListDiv.innerHTML = `<p class="mx-3 my-3 fs-6"> Sorry! This movie doesn't have any showtime. Please choose another one or select similarities in your recommendation below.</p>`
+                    }
+                }, "json");
+            }
+        }
+
+        // Handle onclick function
+        window.onload = function () {
+            if (movieID !== null) {
+                generateDayCards();
+                $(".notify-select").removeClass("d-none");
+                $(".notify-select").addClass("d-flex");
+            }
+            $(".movie").click(function () {
+                $(".notify-select").removeClass("d-flex");
+                $(".notify-select").addClass("d-none");
+                movieID = $(this).attr("data-movieID");
+                generateDayCards(movieID);
+                $(".movie").removeClass("border border-4 border-secondary");
+                $(this).addClass("border border-4 border-secondary");
+                $(".showtime-list").text("");
+                $(".address-list").text("");
+                $.ajax({
+                    url: `/Customer/Ticket/GetRecommendFilms?movie_id=${movieID}`,
+                    method: 'GET',
+                    dataType: "json",
+                    success: function (response) {
+                        renderRecommendFilms(response.data);
+                    }
+                });
+            });
+
+            $(document).on("click", ".days", function () {
+                $(".showtime-list").text("");
+                $(".address-list").text("");
+                days = $(this).text();
+                $(".days").removeClass("active");
+                $(this).addClass("active");
+                $.get(`/Customer/Ticket/GetShowtimeForAMovieWithinADay?movie_id=${movieID}&date=${days}`, (data, status) => {
+                    var showtimes = data.showtimes;
+                    var addresses = data.addresses;
+                    renderAddresses(addresses);
+                }, "json");
+
+            });
+
+            $(document).on("click", ".address", function () {
+                var address_text = $(this).text();
+                $(".address").removeClass("active");
+                $(this).addClass("active");
+                $.get(`/Customer/Ticket/GetShowtimeForAMovieWithinADay?movie_id=${movieID}&date=${days}&address=${address_text}`, (data, status) => {
+                    var showtimeInfo = data.showtimesForAllCondition;
+                    renderShowtimes(showtimeInfo);
+                }, "json");
+            });
+
+            $(document).on("click", ".showtime", function () {
+                var showtimeID = $(this).attr("data-showtimeID");
+                window.location.href = `/Customer/Ticket/ChooseSeat?showtime_id=${showtimeID}`;
+            });
+
+
+        };
+
+        // Render Address
+        function renderAddresses(addresses) {
+            var addressListDiv = document.querySelector('.address-list');
+            if (addressListDiv) {
+                var addressesHTML = '<div class="mx-2 my-2"><h6>Address:</h6></div>';;
+                if (addresses.length > 0) {
+                    addresses.forEach(function (address) {
+                        var addressHTML = `<div class="btn border border-secondary my-2 mx-1 address">${address}</div>`;
+                        addressesHTML += addressHTML;
+                    });
+                } else {
+                    addressesHTML = "<p>No showtime available for this movie</p>";
+                }
+                addressListDiv.innerHTML = addressesHTML;
+            }
+        }
+
+        function renderShowtimes(showtime) {
+            var showtimeListDiv = document.querySelector('.showtime-list');
+            if (showtimeListDiv) {
+                var showtimesHTML = '<div class="mx-2 my-2"><h6>Showtimes:</h6></div>';;
+                if (showtime.length === 0) {
+                    showtimesHTML += '<p>Out of showtimes for today. Please choose another date</p>';
+                } else {
+                    showtime.forEach(function (show) {
+                        var showtimeHTML = `
+                                    <div class="btn my-2 mx-1 showtime active" data-showtimeID="${show.showtimeID}">
+                                        <p>${show.name}</p>
+                                        ${show.time < 10 ? '0' + show.time : show.time}h${show.minute < 10 ? '0' + show.minute : show.minute}
+                                    </div>`;
+                        showtimesHTML += showtimeHTML;
+                    });
+                }
+
+                showtimeListDiv.innerHTML = showtimesHTML;
+            }
+        }
+        // Recommend Films
+        function renderRecommendFilms(data) {
+            $(".recommend-movies").empty();
+            if (data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                    var movie = data[i];
+                    var movieCardHtml = `
+                                    <div class="col-md-3">
+                                        <div class="blog-item d-flex justify-content-start align-item-center" data-movie-id="${movie.movieID}">
+                                            <div class="blog-img">
+                                                <div class="blog-img-inner position-relative">
+                                                    <img class="img-fluid" src="${movie.imageUrl}" alt="Image" style="height:355px; width:240px;">
+                                                    <div class="position-absolute bottom-0 start-50 translate-middle-x d-none flex-column justify-content-between w-100 btn-list-${movie.movieID}" style="background-color: rgba(0,0,0,0.6)">
+                                                        <div class="movie-name mx-2 my-2 d-flex justify-content-center">
+                                                            <h5 class="text-white">${movie.movieName}</h5>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between">
+                                                            <a href="/Customer/Ticket/Index?movie_id=${movie.movieID}" class="btn w-50 mx-2 my-4" style="height: 36px; background-color: black; color:#ffc107;">
+                                                                <span>Book</span>
+                                                            </a>
+                                                            <a href="/Customer/Home/MovieDetail?movie_id=${movie.movieID}" class="btn w-50 mx-2 my-4" style="height: 36px;background-color: black; color:#ffc107;">
+                                                                <span>View</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                    $(".recommend-movies").append(movieCardHtml);
+                }
+            } else {
+                // If data is empty or does not contain movie objects, display a message
+
+            }
+        }
+        $(document).on({
+            mouseenter: function () {
+                var id = $(this).attr("data-movie-id");
+                console.log(id);
+                $(`.btn-list-${id}`).removeClass("d-none").addClass("d-flex");
+            },
+            mouseleave: function () {
+                var id = $(this).attr("data-movie-id");
+                $(`.btn-list-${id}`).removeClass("d-flex").addClass("d-none");
+            }
+        }, ".blog-item");
+    </script>
+}

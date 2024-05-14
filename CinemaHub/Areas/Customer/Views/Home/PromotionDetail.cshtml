@@ -1,0 +1,223 @@
+﻿@model Promotion
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Promotion Detail</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #333; /* Màu nền */
+		}
+
+		.container-custome {
+			max-width: 70%;
+			margin: 10px auto;
+			text-align: center;
+			padding: 5%;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+
+		.promotion {
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+		}
+
+		.promotion-image {
+			width: 40%;
+			margin-right: 20px;
+		}
+
+			.promotion-image img {
+				max-width: 100%;
+				height: auto;
+				border-radius: 8px;
+				width: 100%;
+			}
+
+		.promotion-content {
+			width: 50%;
+			font-size: 16px;
+			line-height: 1.5;
+			text-align: left;
+		}
+
+		.promotion .time {
+			border-radius: 5px;
+			margin-top: 20px;
+			border: 2px inset #b1154a;
+			background-color: #dbdbd9;
+			line-height: 1.5;
+			font-size: 16px;
+		}
+
+		.room {
+			padding: 10px;
+			border: 2px dotted #b1154a;
+			margin-top: 10%;
+		}
+
+		.dx {
+			color: #ff6600;
+			font-size: 18px;
+			font-weight: bold;
+			text-decoration: none;
+			transition: color 0.3s;
+		}
+
+
+		.imax {
+			color: #9900cc;
+			font-size: 20px;
+			font-style: italic;
+			text-shadow: 2px 2px 4px #cccccc;
+			background-image: linear-gradient(45deg, #9900cc, #cc00ff);
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent;
+		}
+
+		.starium {
+			color: #009933;
+			font-size: 16px;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		.gold-class {
+			color: #cc9900;
+			font-size: 22px;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		.lamour {
+			color: #ff3366;
+			font-size: 20px;
+			font-weight: bold;
+			text-decoration: underline;
+		}
+
+		.sweet {
+			color: #993399;
+			font-size: 18px;
+			font-style: italic;
+			text-shadow: 1px 1px 2px #cccccc;
+		}
+
+		.premium-cinema {
+			text-align: center;
+			font-size: 20px;
+			color: #2c2c2c;
+			background-color: #d5d5d5;
+			letter-spacing: .05em;
+			text-shadow: 4px 4px 0px #d5d5d5, 7px 7px 0px rgba(0, 0, 0, 0.2);
+			height: 100px;
+			padding-top: 40px;
+		}
+
+
+		.screenx {
+			font-family: cursive;
+			color: #ff0000;
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		.cine-foret {
+			text-align: center;
+			font-size: 20px;
+			height: 100px;
+			padding-top: 40px;
+			color: #202020;
+			/* background-color: #2d2d2d; */
+			letter-spacing: .1em;
+			text-shadow: -1px -1px 1px #111, 2px 2px 1px #363636;
+		}
+
+		.cine-livingroom {
+			font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+			text-transform: uppercase;
+			text-align: center;
+			font-size: 15px;
+			height: 50px;
+			padding-top: 40px;
+			color: #131313;
+			background-color: #e7e5e4;
+			letter-spacing: .15em;
+			text-shadow: 1px -1px 0 #767676;
+		}
+
+		.cine-suite {
+			font-family: fantasy;
+			color: #663300;
+			font-size: 18px;
+			font-style: italic;
+		}
+
+		.room ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.room li {
+			display: inline-block;
+			margin-right: 10px;
+		}
+
+		.room a {
+			text-decoration: none;
+			padding: 5px 10px;
+			border-radius: 5px;
+		}
+
+			.room a:hover {
+				background-color: #ddd;
+			}
+
+	</style>
+</head>
+<body>
+	<div class="container container-custome" style="background-color: #e8e8e3">
+		<div style="margin-bottom: 20px; font-size: 26px; color: #b1154a;">
+			@Model.Topic
+		</div>
+
+
+		<div class="promotion">
+			<div class="promotion-image">
+				<img src="@Model.ImageUrl" alt="Promotion Image">
+				<div class="time">
+					@Model.StartDate - @Model.EndDate
+				</div>
+			</div>
+			<div class="promotion-content">
+				@Html.Raw(Model.Content)
+			</div>
+		</div>
+		<div class="room">
+			<ul>
+				<li><a class="dx" href="#">4DX</a></li>
+				<li><a class="imax" href="#">Imax</a></li>
+				<li><a class="starium" href="#">Starium</a></li>
+				<li><a class="gold-class" href="#">Goldclass</a></li>
+				<li><a class="lamour" href="#">L'amour</a></li>
+				<li><a class="sweet" href="#">Sweetbox</a></li>
+				<li><a class="premium-cinema" href="#">Premium Cinema</a></li>
+				<li><a class="screenx" href="#">Screenx</a></li>
+				<li><a class="cine-foret" href="#">Cine &amp; Foret</a></li>
+				<li><a class="cine-livingroom" href="#">Cine &amp; Living Room</a></li>
+				<li><a class="cine-suite" href="#">Cine Suite</a></li>
+			</ul>
+
+		</div>
+	</div>
+</body>
+</html>

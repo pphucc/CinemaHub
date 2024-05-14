@@ -1,0 +1,72 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="profile-form" method="post" class="row g-3" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            @*<div class="form-floating mb-3">
+                    <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
+                    <label asp-for="Username" class="form-label"></label>
+                </div>*@
+            <div class=" col-md-6 form-floating mb-3">
+                <input asp-for="Input.FirstName" class="form-control" placeholder="Please enter your firstname." />
+                <label asp-for="Input.FirstName" class="form-label"></label>
+            </div>
+            <div class=" col-md-6 form-floating mb-3">
+                <input asp-for="Input.LastName" class="form-control" placeholder="Please enter your lastname." />
+                <label asp-for="Input.LastName" class="form-label"></label>
+            </div>
+            <div class=" col-md-6 form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
+                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 form-floating mb-3">
+                <input asp-for="Input.DOB" type="date" class="form-control" />
+                <label asp-for="Input.DOB" class="form-label"></label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-12 form-floating mb-3">
+                <input id="Input_Avatar" asp-for="Input.Avatar" class="form-control" />
+                <label asp-for="Input.Avatar" class="form-label"></label>
+                <span asp-validation-for="Input.Avatar" class="text-danger"></span>
+            </div>
+            <img src="@ViewData["avatar"]" alt="Alternate Text" />
+            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Get references to the file input and the image tag
+            var fileInput = $("#Input_Avatar");
+            var imgPreview = $("img");
+
+            // Add event listener to the file input change event
+            fileInput.on("change", function () {
+                // Check if the file input has files
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+
+                    // Set up the FileReader to load the image
+                    reader.onload = function (e) {
+                        imgPreview.attr("src", e.target.result); // Set the image source to the loaded data URL
+                    };
+
+                    // Read the file as a data URL
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+    </script>
+}

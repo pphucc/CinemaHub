@@ -1,0 +1,57 @@
+﻿@model CinemaHub.Models.ViewModels.RoomVM
+
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">New Room</h3>
+    <hr />
+    <form method="post" asp-action="Create" asp-controller="Room">
+        <div class="row">
+
+            <div class="my-3">
+                <label asp-for="@Model.Room.RoomName" class="form-label">Room Name</label>
+                <input type="text" asp-for="@Model.Room.RoomName" class="form-control">
+                <span asp-validation-for="@Model.Room.RoomName" class="text-danger"></span>
+
+            </div>
+            <div class="my-3">
+                <label asp-for="@Model.Room.Status" class="form-label">Room Status</label>
+                <input asp-for="@Model.Room.Status" type="checkbox" class="form-check-input">
+                <span asp-validation-for="@Model.Room.Status" class="text-danger"></span>
+
+            </div>
+            <div class="my-3">
+                <label asp-for="@Model.Room.CinemaID" class="ms-2">Cinema:</label>
+                <select asp-for="@Model.Room.CinemaID" asp-items="@Model.CinemaList"></select>
+            </div>
+            @* <div class="my-3">
+            <label asp-for="@Model.Room.Cinema" class="form-label">Cinema Name</label>
+            <input type="text" asp-for="@Model.Room.Cinema" class="form-control">
+            <span asp-validation-for="@Model.Room.Cinema" class="text-danger"></span>
+
+        </div> *@
+            <div class="my-3">
+                <label asp-for="@Model.Room.Note" class="form-label">Room Note</label>
+                <input asp-for="@Model.Room.Note" class="form-control">
+                <span asp-validation-for="@Model.Room.Note" class="text-danger"></span>
+
+            </div>
+            <div class="col-12 mt-5">
+                <label asp-for="@Model.Room.NumOfSeats">No. of seats </label>
+                <input asp-for="@Model.Room.NumOfSeats" rows="3" class="form-control"> </input>
+                <span asp-validation-for="@Model.Room.NumOfSeats" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-dark my-3">Create</button>
+            <a asp-controller="Room" asp-action="Index" class="btn btn-secondary my-3" style="width:200px">
+                Back to Room list
+            </a>
+        </div>      
+    </form>
+</div>
+
+
+@*Validate on client side*@
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+

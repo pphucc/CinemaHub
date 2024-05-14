@@ -1,0 +1,105 @@
+﻿@model List<Ticket>
+
+<!-- Include DataTables CSS -->
+<div class="container mt-5" style="min-height:60vh;">
+    <h2 class="m-2 mb-5">My Tickets</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p>No tickets found.</p>
+    }
+    else
+    {
+        <table id="ticketsTable" class="table">
+            <thead>
+                <tr>
+                    <th>#</th> <!-- Row number column -->
+                    <th>Movie Name</th>
+                    <th>Showtime</th>
+                    <th>Cinema</th>
+                    <th>Room</th>
+                    <th>Seat</th>
+                    <th>Price</th>
+                    <th>Booked Date</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model)
+                {
+                    var currentTime = DateTime.Now;
+                    var showtime = new DateTime(ticket.Showtime.Date.Year, ticket.Showtime.Date.Month, ticket.Showtime.Date.Day, ticket.Showtime.Time, ticket.Showtime.Minute, 0);
+                    var timeDifference = (showtime - currentTime).TotalHours;
+
+                    <tr>
+                        <td></td> <!-- Empty td for row number -->
+                        <td>@ticket.Showtime.Movie.MovieName</td>
+                        <td>@ticket.Showtime.Date.ToShortDateString() @ticket.Showtime.Time:@ticket.Showtime.Minute</td>
+                        <td>@ticket.Showtime.Room.Cinema.CinemaName</td>
+                        <td>@ticket.Showtime.Room.RoomName</td>
+                        <td>@ticket.Seat.SeatName</td>
+                        <td>$@ticket.Total</td>
+                        <td>@ticket.BookedDate</td>
+                        <td>
+                            @if (timeDifference >= 1 && ticket.TicketStatus.ToLower() == "available")
+                            {
+                                <a class="btn btn-warning" asp-controller="Ticket" asp-action="Refund" asp-route-ticketId="@ticket.TicketID">Refund</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">@ticket.TicketStatus</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-success view-qr-code" data-ticket-id="@ticket.TicketID">QRCode</button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
+
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="qrCodeContent"></div> <!-- Placeholder for partial view content -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Include DataTables JS -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#ticketsTable').DataTable({
+                "rowCallback": function (row, data, index) {
+                    var api = this.api();
+                    var page = api.page();
+                    var start = page * api.page.len();
+                    var counter = start + index + 1;
+                    $('td:eq(0)', row).html(counter);
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).on("click", ".view-qr-code", function () {
+                var ticketId = $(this).data('ticket-id');
+                var url = '../Ticket/ViewQRCode?ticketId=' + ticketId;
+
+                $('#qrCodeContent').load(url);
+
+                var qrCodeModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+                qrCodeModal.show();
+            });
+        });
+    </script>
+}

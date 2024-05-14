@@ -1,0 +1,104 @@
+﻿<!-- Content Start -->
+<div class="content">
+    <!-- Sale & Revenue Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-evenly p-4">
+                    <h6 class="my-0">Onliners:</h6>
+                    <i class="bi bi-globe2 fa-2x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2 online-users-label">Users</p>
+                        <h6 class="mb-0 online-user-number"></h6>
+                    </div>
+                    <div class="ms-3">
+                        <p class="mb-2 online-users-label">Guests</p>
+                        <h6 class="mb-0 online-guest-number"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-evenly p-4">
+                    <i class="bi bi-people-fill text-primary fa-2x"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Total Customers</p>
+                        <h6 class="mb-0 total-customers"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-chart-area fa-3x text-primary"></i>
+
+                    <div class="ms-3">
+                        <p class="mb-2">Total Ticket</p>
+                        <h6 class="mb-0 total-tickets"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                    <i class="fa fa-chart-area fa-3x text-primary"></i>
+                    <div class="ms-3">
+                        <p class="mb-2">Total Revenue</p>
+                        <h6 class="mb-0 total-revenue">$1234</h6>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <!-- Sale & Revenue End -->
+
+    <!-- Chart Sections -->
+    <div class="container-fluid py-4 px-4">
+        <div class="row g-4">
+            @* Tickets Per days *@
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="mb-0" style="color:#0000ff">Tickets per day</h5>
+                    </div>
+                    <canvas id="tickets-per-day"></canvas>
+                </div>
+            </div>
+            @* Revenue per day *@
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="mb-0" style="color:#0000ff">Revenue per day</h5>
+                    </div>
+                    <canvas id="revenue-per-day"></canvas>
+                </div>
+            </div>
+            @* Online Users Chart *@
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="mb-0" style="color:#0000ff">Online Users</h5>
+                    </div>
+                    <canvas id="online-user-chart"></canvas>
+                </div>
+            </div>
+           @*  Trending Movies *@
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light h-100 text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="mb-0" style="color:#0000ff">Trending Movies</h5>
+                        <select class="form-select filter-trending w-50" id="floatingSelect" aria-label="Floating label select example">
+                            <option selected value="History">History</option>
+                            <option value="Day">Day</option>
+                            <option value="Month">Month</option>
+                            <option value="Year">Year</option>
+                        </select>
+                    </div>
+                    <div class="d-flex flex-column trending-movies">
+                                              
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart End -->
+</div>
+<!-- Content End -->

@@ -1,0 +1,18 @@
+﻿@model string
+
+<div class="">
+    <a href="@Url.Action("DownloadQRCode", new { ticketId = ViewBag.TicketId })" class="btn btn-outline-warning mb-2" download>Download QR Code</a>
+    <img src="@Model" class="img-thumbnail" id="qrCodeImage" />
+</div>
+
+<div id="ticketInfo" class="mt-2">
+    <ul class="list-group">
+        <li class="list-group-item">Ticket Status: <strong>@ViewData["TicketStatus"]</strong></li>
+        <li class="list-group-item">Showtime: @ViewData["Showtime"]</li>
+        <li class="list-group-item">Room Name: @ViewData["RoomName"]</li>
+        <li class="list-group-item">Seat Name: @ViewData["SeatName"]</li>
+    </ul>
+</div>
+
+
+

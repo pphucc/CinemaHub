@@ -1,0 +1,34 @@
+﻿@model IEnumerable<Room>
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">Manage Room</h3>
+    <hr />
+    <div class="d-flex w-100 my-5 justify-content-end">
+        <a class="btn btn-dark mx-2" asp-controller="Room" asp-action="Create">
+            <i class="bi bi-plus-circle"></i>
+            Add new Room
+        </a>
+    </div>
+
+    <table id="roomTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+
+                <th>Room Name</th>
+                <th>Status</th>
+                <th>Cinema</th>
+                <th>Note</th>
+                <th>No. seats</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+    <div class="d-flex w-100 my-5 justify-content-start error-actions">
+        <a class="btn btn-warning mx-2" asp-area="Customer" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-house"></i> Back to Home
+        </a>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript" src="~/js/room.js"></script>
+
+}

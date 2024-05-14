@@ -1,0 +1,50 @@
+﻿@model Seat
+
+<div class="container my-5" style="min-height:840px">
+    <h3 class="text-dark">Update Seat</h3>
+    <hr />
+    <form method="post" asp-action="Update" asp-controller="Seat">
+        <input asp-for="SeatID" class="form-text" value="@Model.SeatID" hidden readonly />
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th scope="row"><label class="form-label">Room Name</label></th>
+                    <td>
+                        <input asp-for="RoomID" class="form-text" value="@Model.RoomID" hidden readonly />
+                        <span>@Model.Room.RoomName</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label asp-for="SeatName" class="form-label"></label></th>
+                    <td>
+                        <input asp-for="SeatName" class="form-control w-25" value="@Model.SeatName" />
+                        <span asp-validation-for="SeatName" class="text-danger"></span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row"><label asp-for="SeatStatus" class="form-label"></label></th>
+                    <td>
+                        <select asp-for="SeatStatus" class="form-control w-25">
+                            @* <option disabled selected value="disable_select">---Set Status---</option> *@
+                            <option value="AVAILABLE" style="color: green;">Available</option>
+                            <option value="LOCKED" style="color: red;">Locked</option>
+                        </select>
+                        <span asp-validation-for="SeatStatus" class="text-danger"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a asp-controller="Seat" asp-action="RoomSeats" asp-route-room_id="@Model.RoomID"class="btn btn-secondary">View Room's Seats</a>
+        </div>
+    </form>
+</div>
+
+@*Validate on client side*@
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
