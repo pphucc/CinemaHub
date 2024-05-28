@@ -1,4 +1,4 @@
-﻿namespace CinemaHub.Services
+﻿namespace CinemaHub.Services.IServices
 {
     public interface ITicketService
     {
