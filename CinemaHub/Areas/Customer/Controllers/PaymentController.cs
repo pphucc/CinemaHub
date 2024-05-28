@@ -8,6 +8,7 @@ using CinemaHub.Models;
 using CinemaHub.Models.ViewModels;
 using System.Security.Claims;
 using System.Threading.Channels;
+using CinemaHub.Services.IServices;
 
 namespace CinemaHub.Areas.Customer.Controllers
 {
@@ -18,12 +19,14 @@ namespace CinemaHub.Areas.Customer.Controllers
         private Payment payment;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IVnPayService _vnPayService;
 
 
-        public PaymentController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public PaymentController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, IVnPayService vnPayService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _vnPayService = vnPayService;
         }
 
 

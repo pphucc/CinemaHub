@@ -9,11 +9,11 @@ using CinemaHub.DataAccess.Data;
 using CinemaHub.DataAccess.Repositories;
 using CinemaHub.Models;
 using CinemaHub.Models.ViewModels;
-using CinemaHub.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using CinemaHub.Services.IServices;
 
 namespace CinemaHub.Areas.Customer.Controllers
 {
@@ -89,11 +89,11 @@ namespace CinemaHub.Areas.Customer.Controllers
             var pointsRefund = 0.0;
             if (ticket.Voucher != null)
             {
-                pointsRefund = ticket.Total * (1 - ticket.Voucher.Value / 100) * 0.8 * 1000; // Convert to points
+                pointsRefund = ticket.Total * (1 - ticket.Voucher.Value / 100) * 0.8 / 1000; // Convert to points
             }
             else
             {
-                pointsRefund = ticket.Total * 0.8 * 1000; // Convert to points
+                pointsRefund = ticket.Total * 0.8 / 1000; // Convert to points
             }
             user.Point += (decimal)pointsRefund; // Increase the user's points
 
@@ -129,15 +129,6 @@ namespace CinemaHub.Areas.Customer.Controllers
             var currentTime = DateTime.Now; // Get the current time
 
             var allTickets = await _unitOfWork.Ticket.GetAllAsync(u => u.AppUserID == claim.Value, includeProperties: "Showtime,Seat,Voucher");
-
-            foreach (var ticket in allTickets)
-            {
-                var voucher = ticket.Voucher;
-                if (voucher != null)
-                {
-                    ticket.Total = ticket.Total * (1 - voucher.Value / 100);
-                }
-            }
 
             foreach (var ticket in allTickets)
             {
@@ -182,211 +173,12 @@ namespace CinemaHub.Areas.Customer.Controllers
             }
         }
 
-        public async Task<IActionResult> BookingProcess(string seatIDs, Guid showtime_id, string? payment_method, string? status = null, string? voucherCode = null)
+        public async Task<IActionResult> Cancel(string? seatIDs, Guid? showtime_id)
         {
-            try
-            {
+            var session = HttpContext.Session;
+            seatIDs = session.GetString("seatIDs") != null ? session.GetString("seatIDs") : seatIDs;
+            showtime_id = session.GetString("showtime_id") != null ? Guid.Parse(session.GetString("showtime_id")) : showtime_id;
 
-                var voucher = await _unitOfWork.Voucher.GetFirstOrDefaultAsync(u => u.VoucherName == voucherCode);
-                double voucher_value = 0;
-                Guid? voucher_id = null;
-                if (voucher != null)
-                {
-                    voucher_value = voucher.Value;
-                    voucher_id = voucher.VoucherID;
-                }
-
-                string[] seatIDListString = seatIDs.Split(',');
-                List<Guid> seatIDList = new List<Guid>();
-
-                foreach (var s in seatIDListString)
-                {
-                    Guid sID = Guid.Parse(s);
-                    seatIDList.Add(sID);
-                }
-
-                if (payment_method == null)
-                {
-                    TempData["error"] = "Payment Fails.";
-                    return RedirectToAction("Cancel", new
-                    {
-                        seatIDs = seatIDs,
-                        showtime_id = showtime_id,
-                    });
-                }
-                else if (payment_method == "point")
-                {
-                    var showtime = await _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id, includeProperties: "Room");
-                    var movie = await _unitOfWork.Movie.GetFirstOrDefaultAsync(u => u.MovieID == showtime.MovieID);
-                    var claimsIdentity = (ClaimsIdentity)User.Identity;
-                    var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-                    var user = await _userManager.FindByIdAsync(claim.Value);
-
-
-                    List<Seat> seatList = new List<Seat>();
-                    List<Ticket> ticketList = new List<Ticket>();
-                    foreach (var seatID in seatIDList)
-                    {
-                        var seat = await _unitOfWork.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
-
-                        Ticket ticket = new Ticket();
-                        ticket.SeatID = seat.SeatID;
-                        ticket.Seat = seat;
-                        ticket.ShowtimeID = showtime_id;
-                        ticket.Total = movie.Price;
-                        ticket.AppUserID = claim.Value;
-                        if (voucher != null)
-                        {
-                            ticket.VoucherID = voucher_id;
-                        }
-                        ticket.BookedDate = DateTime.Now;
-                        ticketList.Add(ticket);
-                        _unitOfWork.Ticket.Add(ticket);
-                        user.Point = user.Point - (decimal)movie.Price * (decimal)(1 - voucher_value / 100) * 1000;
-
-
-                    }
-                    if (voucher != null)
-                    {
-                        voucher.Quantity--;
-                        _unitOfWork.Voucher.Update(voucher);
-                    }
-                    string message = await GenerateEmailMessage(ticketList, showtime);
-                    await _emailSender.SendEmailAsync(user.Email, "CinemaHub: Your Tickets", message);
-                    _unitOfWork.Save();
-
-                    HandleLockAndUnlock(seatIDList, showtime_id, "success");
-
-                    foreach (var seatId in seatIDList)
-                    {
-                        var ticket = await _unitOfWork.Ticket.GetFirstOrDefaultAsync(
-                            u => u.SeatID == seatId && u.ShowtimeID == showtime_id);
-                        var timeSpan = CalculateDifferentTime(ticket.ShowtimeID);
-                        _backgroundJobClient.Schedule(() =>
-                             _ticketService.ExpriedTicket(ticket.TicketID), TimeSpan.FromSeconds(timeSpan));
-                    }
-                    TempData["msg"] = "Payment execute successfully.";
-
-                    return View();
-                }
-                else if (payment_method == "paypal")
-                {
-
-                    switch (status)
-                    {
-                        case null:
-                            {
-                                return RedirectToAction("AuthorizePayment", "Payment", new
-                                {
-                                    seatIDs = seatIDs,
-                                    showtime_id = showtime_id,
-                                    status = status,
-                                    voucherCode = voucherCode
-                                });
-                            }
-                        case "success":
-                            {
-
-                                var showtime = await _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id, includeProperties: "Room");
-                                var movie = await _unitOfWork.Movie.GetFirstOrDefaultAsync(u => u.MovieID == showtime.MovieID);
-                                var claimsIdentity = (ClaimsIdentity)User.Identity;
-                                var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-                                var user = await _userManager.FindByIdAsync(claim.Value);
-
-
-                                List<Seat> seatList = new List<Seat>();
-                                List<Ticket> ticketList = new List<Ticket>();
-                                foreach (var seatID in seatIDList)
-                                {
-                                    var seat = await _unitOfWork.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
-
-                                    Ticket ticket = new Ticket();
-                                    ticket.SeatID = seat.SeatID;
-                                    ticket.Seat = seat;
-                                    ticket.ShowtimeID = showtime_id;
-                                    ticket.Total = movie.Price * (1 - voucher_value / 100);
-                                    ticket.AppUserID = claim.Value;
-                                    ticket.BookedDate = DateTime.Now;
-                                    if (voucher != null)
-                                    {
-                                        ticket.VoucherID = voucher_id;
-                                        voucher.Quantity--;
-                                        _unitOfWork.Voucher.Update(voucher);
-                                    }
-                                    user.Point += (decimal)(0.05 * movie.Price) * 1000;
-
-
-                                    ticketList.Add(ticket);
-                                    _unitOfWork.Ticket.Add(ticket);
-                                }
-                                if (voucher != null)
-                                {
-                                    voucher.Quantity--;
-                                    _unitOfWork.Voucher.Update(voucher);
-                                }
-
-                                string message = await GenerateEmailMessage(ticketList, showtime);
-                                await _emailSender.SendEmailAsync(user.Email, "CinemaHub: Your Tickets", message);
-
-                                _unitOfWork.Save();
-                                HandleLockAndUnlock(seatIDList, showtime_id, "success");
-
-                                foreach (var seatId in seatIDList)
-                                {
-                                    var ticket = await _unitOfWork.Ticket.GetFirstOrDefaultAsync(
-                                        u => u.SeatID == seatId && u.ShowtimeID == showtime_id);
-                                    var timeSpan = CalculateDifferentTime(ticket.ShowtimeID);
-                                    _backgroundJobClient.Schedule(() =>
-                                         _ticketService.ExpriedTicket(ticket.TicketID), TimeSpan.FromSeconds(timeSpan));
-                                }
-
-                                TempData["msg"] = "Payment execute successfully.";
-                                return View();
-                            }
-                        case "cancel":
-                            {
-                                TempData["error"] = "Payment Cancelled.";
-                                return RedirectToAction("Cancel", new
-                                {
-                                    seatIDs = seatIDs,
-                                    showtime_id = showtime_id,
-                                });
-                            }
-                        case "fail":
-                            {
-                                TempData["error"] = "Payment Fails.";
-                                return RedirectToAction("Cancel", new
-                                {
-                                    seatIDs = seatIDs,
-                                    showtime_id = showtime_id,
-                                });
-                            }
-                        default:
-                            {
-                                TempData["error"] = "Payment Fails.";
-                                return RedirectToAction("Cancel", new
-                                {
-                                    seatIDs = seatIDs,
-                                    showtime_id = showtime_id,
-                                });
-                            }
-                    }
-                }
-                else
-                {
-                    TempData["error"] = "An unexpected error occurs. Please try again.";
-                    return RedirectToAction("ChooseSeat", new { showtime_id = showtime_id });
-                }
-
-            }
-            catch (Exception ex)
-            {
-                TempData["error"] = "An unexpected error occurs. Please try again.";
-                return RedirectToAction("Error", "Home");
-            }
-        }
-        public async Task<IActionResult> Cancel(string seatIDs, Guid showtime_id)
-        {
             string[] seatIDListString = seatIDs.Split(',');
             List<Guid> seatIDList = new List<Guid>();
             foreach (var s in seatIDListString)
@@ -402,7 +194,7 @@ namespace CinemaHub.Areas.Customer.Controllers
                 if (seat.SeatStatus.ToLower().Contains(showtime_id + "_status=pending"))
                 {
                     isReload = true;
-                    _backgroundJobClient.Enqueue(() => _unlockASeatService.UnlockASeat(seatId, showtime_id, "pending"));
+                    _backgroundJobClient.Enqueue(() => _unlockASeatService.UnlockASeat(seatId, (Guid)showtime_id, "pending"));
                 }
             }
 
@@ -410,7 +202,7 @@ namespace CinemaHub.Areas.Customer.Controllers
             return RedirectToAction("ChooseSeat", new { showtime_id = showtime_id });
 
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> LockSeats(string seatIDs, Guid showtime_id)
         {
@@ -555,60 +347,6 @@ namespace CinemaHub.Areas.Customer.Controllers
         }
 
 
-
-        public double CalculateDifferentTime(Guid showtime_id)
-        {
-            Showtime showtime = _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id).Result;
-
-            DateTime currentTime = DateTime.Now;
-            DateOnly showTimeDate = showtime.Date;
-            DateTime endShow = new DateTime(showTimeDate.Year, showTimeDate.Month, showTimeDate.Day, showtime.Time, showtime.Minute, 0);
-
-            TimeSpan difference = endShow - currentTime;
-            // Get the difference in seconds
-            double timeUntilShowtimeEnd = difference.TotalSeconds;
-
-            return timeUntilShowtimeEnd;
-        }
-        public async Task HandleLockAndUnlock(List<Guid> seats, Guid showtime_id, string? status)
-        {
-
-
-            try
-            {
-                using var dbContext = _dbContextFactory.CreateDbContext();
-                IUnitOfWork uow = new UnitOfWork(dbContext);
-                // Handle payment settings -- On developing
-
-                double timeSpan = 0;
-                if (status == "pending")
-                {
-                    timeSpan = 3 * 60; // 3 min
-                }
-
-                if (status == "success")
-                {
-                    timeSpan = CalculateDifferentTime(showtime_id);
-                }
-
-
-                foreach (var seatID in seats)
-                {
-                    var seat = await uow.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
-                    LockASeat(seat, showtime_id, status);
-                    _backgroundJobClient.Schedule(() =>
-                        _unlockASeatService.UnlockASeat(seatID, showtime_id, status), TimeSpan.FromSeconds(timeSpan));
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-
-        }
-
         private void LockASeat(Seat seat, Guid showtime_id, string? status)
         {
             using var dbContext = _dbContextFactory.CreateDbContext();
@@ -639,32 +377,6 @@ namespace CinemaHub.Areas.Customer.Controllers
             uow.Seat.Update(seat);
             uow.Save();
             Console.WriteLine($"Lock : {showtime_id.ToString().ToUpper()}");
-        }
-        public async Task<string> GenerateEmailMessage(List<Ticket> tickets, Showtime showtime)
-        {
-            Room room = await _unitOfWork.Room.GetFirstOrDefaultAsync(u => u.RoomID == showtime.RoomID);
-            Cinema cinema = await _unitOfWork.Cinema.GetFirstOrDefaultAsync(u => u.CinemaID == room.CinemaID);
-
-            StringBuilder message = new StringBuilder();
-            message.Append("<p>Dear Customer,</p>");
-            message.Append("<p>Thank you for booking tickets with us. Below are the details of your booking:</p>");
-            message.Append($"<strong>{cinema.CinemaName}</strong>");
-
-            message.Append("<table border='1' cellpadding='5' cellspacing='0'>");
-            message.Append("<tr><th>Movie</th><th>Room</th><th>Seat</th><th>Showtime</th><th>Total</th></tr>");
-
-            foreach (var ticket in tickets)
-            {
-                var date = ticket.Showtime.Date.ToShortDateString() + " " + ticket.Showtime.Time + ":" + ticket.Showtime.Minute;
-                message.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4:C}</td></tr>",
-                    ticket.Showtime.Movie.MovieName, room.RoomName, ticket.Seat.SeatName, date, ticket.Total);
-            }
-
-            message.Append("</table>");
-            message.Append("<p>Thank you for choosing our service. Enjoy the show!</p>");
-            message.Append("<p>Best regards,<br/>Your Cinema Team</p>");
-
-            return message.ToString();
         }
 
         #region API Call
@@ -783,26 +495,313 @@ namespace CinemaHub.Areas.Customer.Controllers
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
             DateTime currentDateTime = DateTime.Now;
             var movie = await _unitOfWork.Movie.GetFirstOrDefaultAsync(u => u.MovieID == movie_id);
-            var category = movie.Category??"No Category Available";
+            var category = movie.Category ?? "No Category Available";
             var categories = category.ToLower().Split(',');
             var recommendedMovies = await _unitOfWork.Movie.GetAllAsync(u => categories.Any(c => u.Category.ToLower().Contains(c.Trim())) || u.Category.ToLower() == category.ToLower());
             recommendedMovies = recommendedMovies.Where(m => m.MovieID != movie_id);
-            List<Showtime> showtimesForThisMovie = new List<Showtime>() ;
+            List<Showtime> showtimesForThisMovie = new List<Showtime>();
             foreach (var m in recommendedMovies)
             {
                 var showtime = await _unitOfWork.Showtime.GetAllAsync(u => u.MovieID == m.MovieID);
                 showtimesForThisMovie.AddRange(showtime);
-            };           
+            };
             var availableRecommendMovies = from showtime in showtimesForThisMovie
                                            join m in recommendedMovies on showtime.MovieID equals m.MovieID
                                            where (showtime.Date > currentDate || // Showtime Date is bigger than current date
                                                (showtime.Date == currentDate && showtime.Time > currentDateTime.Hour) || // Current date == Showtime Date
                                                (showtime.Date == currentDate && showtime.Time == currentDateTime.Hour && showtime.Minute > currentDateTime.Minute))
-                                            select m;
+                                           select m;
             // Maximum is 4
             availableRecommendMovies = availableRecommendMovies.Take(4);
-            return Json(new {data = availableRecommendMovies});
+            return Json(new { data = availableRecommendMovies });
         }
+        #endregion
+
+
+        #region OLD CODE
+        //public double CalculateDifferentTime(Guid showtime_id)
+        //{
+        //    Showtime showtime = _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id).Result;
+
+        //    DateTime currentTime = DateTime.Now;
+        //    DateOnly showTimeDate = showtime.Date;
+        //    DateTime endShow = new DateTime(showTimeDate.Year, showTimeDate.Month, showTimeDate.Day, showtime.Time, showtime.Minute, 0);
+
+        //    TimeSpan difference = endShow - currentTime;
+        //    // Get the difference in seconds
+        //    double timeUntilShowtimeEnd = difference.TotalSeconds;
+
+        //    return timeUntilShowtimeEnd;
+        //}
+        //public async Task HandleLockAndUnlock(List<Guid> seats, Guid showtime_id, string? status)
+        //{
+        //    try
+        //    {
+        //        using var dbContext = _dbContextFactory.CreateDbContext();
+        //        IUnitOfWork uow = new UnitOfWork(dbContext);
+        //        // Handle payment settings -- On developing
+
+        //        double timeSpan = 0;
+        //        if (status == "pending")
+        //        {
+        //            timeSpan = 3 * 60; // 3 min
+        //        }
+
+        //        if (status == "success")
+        //        {
+        //            timeSpan = CalculateDifferentTime(showtime_id);
+        //        }
+
+
+        //        foreach (var seatID in seats)
+        //        {
+        //            var seat = await uow.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
+        //            LockASeat(seat, showtime_id, status);
+        //            _backgroundJobClient.Schedule(() =>
+        //                _unlockASeatService.UnlockASeat(seatID, showtime_id, status), TimeSpan.FromSeconds(timeSpan));
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //        throw;
+        //    }
+
+        //}
+
+
+        //public async Task<string> GenerateEmailMessage(List<Ticket> tickets, Showtime showtime)
+        //{
+        //    Room room = await _unitOfWork.Room.GetFirstOrDefaultAsync(u => u.RoomID == showtime.RoomID);
+        //    Cinema cinema = await _unitOfWork.Cinema.GetFirstOrDefaultAsync(u => u.CinemaID == room.CinemaID);
+
+        //    StringBuilder message = new StringBuilder();
+        //    message.Append("<p>Dear Customer,</p>");
+        //    message.Append("<p>Thank you for booking tickets with us. Below are the details of your booking:</p>");
+        //    message.Append($"<strong>{cinema.CinemaName}</strong>");
+
+        //    message.Append("<table border='1' cellpadding='5' cellspacing='0'>");
+        //    message.Append("<tr><th>Movie</th><th>Room</th><th>Seat</th><th>Showtime</th><th>Total</th></tr>");
+
+        //    foreach (var ticket in tickets)
+        //    {
+        //        var date = ticket.Showtime.Date.ToShortDateString() + " " + ticket.Showtime.Time + ":" + ticket.Showtime.Minute;
+        //        message.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4:C}</td></tr>",
+        //            ticket.Showtime.Movie.MovieName, room.RoomName, ticket.Seat.SeatName, date, ticket.Total);
+        //    }
+
+        //    message.Append("</table>");
+        //    message.Append("<p>Thank you for choosing our service. Enjoy the show!</p>");
+        //    message.Append("<p>Best regards,<br/>Your Cinema Team</p>");
+
+        //    return message.ToString();
+        //}
+
+        //public async Task<IActionResult> BookingProcess(string seatIDs, Guid showtime_id, string? payment_method, string totalAmount, string? status = null, string? voucherCode = null)
+        //{
+        //    try
+        //    {
+
+        //        var voucher = await _unitOfWork.Voucher.GetFirstOrDefaultAsync(u => u.VoucherName == voucherCode);
+        //        double voucher_value = 0;
+        //        Guid? voucher_id = null;
+        //        if (voucher != null)
+        //        {
+        //            voucher_value = voucher.Value;
+        //            voucher_id = voucher.VoucherID;
+        //        }
+
+        //        string[] seatIDListString = seatIDs.Split(',');
+        //        List<Guid> seatIDList = new List<Guid>();
+
+        //        foreach (var s in seatIDListString)
+        //        {
+        //            Guid sID = Guid.Parse(s);
+        //            seatIDList.Add(sID);
+        //        }
+
+        //        if (payment_method == null)
+        //        {
+        //            TempData["error"] = "Payment Fails.";
+        //            return RedirectToAction("Cancel", new
+        //            {
+        //                seatIDs = seatIDs,
+        //                showtime_id = showtime_id,
+        //            });
+        //        }
+        //        else if (payment_method == "point")
+        //        {
+        //            var showtime = await _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id, includeProperties: "Room");
+        //            var movie = await _unitOfWork.Movie.GetFirstOrDefaultAsync(u => u.MovieID == showtime.MovieID);
+        //            var claimsIdentity = (ClaimsIdentity)User.Identity;
+        //            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+        //            var user = await _userManager.FindByIdAsync(claim.Value);
+
+
+        //            List<Seat> seatList = new List<Seat>();
+        //            List<Ticket> ticketList = new List<Ticket>();
+        //            foreach (var seatID in seatIDList)
+        //            {
+        //                var seat = await _unitOfWork.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
+
+        //                Ticket ticket = new Ticket();
+        //                ticket.SeatID = seat.SeatID;
+        //                ticket.Seat = seat;
+        //                ticket.ShowtimeID = showtime_id;
+        //                ticket.Total = movie.Price;
+        //                ticket.AppUserID = claim.Value;
+        //                if (voucher != null)
+        //                {
+        //                    ticket.VoucherID = voucher_id;
+        //                }
+        //                ticket.BookedDate = DateTime.Now;
+        //                ticketList.Add(ticket);
+        //                _unitOfWork.Ticket.Add(ticket);
+        //                user.Point = user.Point - (decimal)movie.Price * (decimal)(1 - voucher_value / 100) * 1000;
+
+
+        //            }
+        //            if (voucher != null)
+        //            {
+        //                voucher.Quantity--;
+        //                _unitOfWork.Voucher.Update(voucher);
+        //            }
+        //            string message = await GenerateEmailMessage(ticketList, showtime);
+        //            await _emailSender.SendEmailAsync(user.Email, "CinemaHub: Your Tickets", message);
+        //            _unitOfWork.Save();
+
+        //            HandleLockAndUnlock(seatIDList, showtime_id, "success");
+
+        //            foreach (var seatId in seatIDList)
+        //            {
+        //                var ticket = await _unitOfWork.Ticket.GetFirstOrDefaultAsync(
+        //                    u => u.SeatID == seatId && u.ShowtimeID == showtime_id);
+        //                var timeSpan = CalculateDifferentTime(ticket.ShowtimeID);
+        //                _backgroundJobClient.Schedule(() =>
+        //                     _ticketService.ExpriedTicket(ticket.TicketID), TimeSpan.FromSeconds(timeSpan));
+        //            }
+        //            TempData["msg"] = "Payment execute successfully.";
+
+        //            return View();
+        //        }
+        //        else if (payment_method == "paypal")
+        //        {
+
+        //            switch (status)
+        //            {
+        //                case null:
+        //                    {
+        //                        return RedirectToAction("AuthorizePayment", "Payment", new
+        //                        {
+        //                            seatIDs = seatIDs,
+        //                            showtime_id = showtime_id,
+        //                            status = status,
+        //                            voucherCode = voucherCode
+        //                        });
+        //                    }
+        //                case "success":
+        //                    {
+
+        //                        var showtime = await _unitOfWork.Showtime.GetFirstOrDefaultAsync(u => u.ShowtimeID == showtime_id, includeProperties: "Room");
+        //                        var movie = await _unitOfWork.Movie.GetFirstOrDefaultAsync(u => u.MovieID == showtime.MovieID);
+        //                        var claimsIdentity = (ClaimsIdentity)User.Identity;
+        //                        var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+        //                        var user = await _userManager.FindByIdAsync(claim.Value);
+
+
+        //                        List<Seat> seatList = new List<Seat>();
+        //                        List<Ticket> ticketList = new List<Ticket>();
+        //                        foreach (var seatID in seatIDList)
+        //                        {
+        //                            var seat = await _unitOfWork.Seat.GetFirstOrDefaultAsync(u => u.SeatID == seatID);
+
+        //                            Ticket ticket = new Ticket();
+        //                            ticket.SeatID = seat.SeatID;
+        //                            ticket.Seat = seat;
+        //                            ticket.ShowtimeID = showtime_id;
+        //                            ticket.Total = movie.Price * (1 - voucher_value / 100);
+        //                            ticket.AppUserID = claim.Value;
+        //                            ticket.BookedDate = DateTime.Now;
+        //                            if (voucher != null)
+        //                            {
+        //                                ticket.VoucherID = voucher_id;
+        //                                voucher.Quantity--;
+        //                                _unitOfWork.Voucher.Update(voucher);
+        //                            }
+        //                            user.Point += (decimal)(0.05 * movie.Price) * 1000;
+
+
+        //                            ticketList.Add(ticket);
+        //                            _unitOfWork.Ticket.Add(ticket);
+        //                        }
+        //                        if (voucher != null)
+        //                        {
+        //                            voucher.Quantity--;
+        //                            _unitOfWork.Voucher.Update(voucher);
+        //                        }
+
+        //                        string message = await GenerateEmailMessage(ticketList, showtime);
+        //                        await _emailSender.SendEmailAsync(user.Email, "CinemaHub: Your Tickets", message);
+
+        //                        _unitOfWork.Save();
+        //                        HandleLockAndUnlock(seatIDList, showtime_id, "success");
+
+        //                        foreach (var seatId in seatIDList)
+        //                        {
+        //                            var ticket = await _unitOfWork.Ticket.GetFirstOrDefaultAsync(
+        //                                u => u.SeatID == seatId && u.ShowtimeID == showtime_id);
+        //                            var timeSpan = CalculateDifferentTime(ticket.ShowtimeID);
+        //                            _backgroundJobClient.Schedule(() =>
+        //                                 _ticketService.ExpriedTicket(ticket.TicketID), TimeSpan.FromSeconds(timeSpan));
+        //                        }
+
+        //                        TempData["msg"] = "Payment execute successfully.";
+        //                        return View();
+        //                    }
+        //                case "cancel":
+        //                    {
+        //                        TempData["error"] = "Payment Cancelled.";
+        //                        return RedirectToAction("Cancel", new
+        //                        {
+        //                            seatIDs = seatIDs,
+        //                            showtime_id = showtime_id,
+        //                        });
+        //                    }
+        //                case "fail":
+        //                    {
+        //                        TempData["error"] = "Payment Fails.";
+        //                        return RedirectToAction("Cancel", new
+        //                        {
+        //                            seatIDs = seatIDs,
+        //                            showtime_id = showtime_id,
+        //                        });
+        //                    }
+        //                default:
+        //                    {
+        //                        TempData["error"] = "Payment Fails.";
+        //                        return RedirectToAction("Cancel", new
+        //                        {
+        //                            seatIDs = seatIDs,
+        //                            showtime_id = showtime_id,
+        //                        });
+        //                    }
+        //            }
+        //        }
+        //        else 
+        //        {
+        //            TempData["error"] = "An unexpected error occurs. Please try again.";
+        //            return RedirectToAction("ChooseSeat", new { showtime_id = showtime_id });
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TempData["error"] = "An unexpected error occurs. Please try again.";
+        //        return RedirectToAction("Error", "Home");
+        //    }
+        //}
+
         #endregion
     }
 }

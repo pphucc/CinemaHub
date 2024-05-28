@@ -9,6 +9,7 @@
     var total = ViewData["Total"] as string;
     var point = ViewData["user_points"] as string;
 }
+
 <style>
     .ticket-container {
         border: 1px solid #ccc;
@@ -55,7 +56,7 @@
         <div class="col-md-6 offset-md-3">
             <div class="countdown-container">
                 <span>These seats have been temporary lock for your ordering in</span>
-                <div class="countdown-clock" id="countdown">03:00</div>
+                <div class="countdown-clock" id="countdown">--:--</div>
                 <span>Please complete your payment.</span>
             </div>
 
@@ -100,7 +101,8 @@
                 <hr />
             </div>
             <div class="">
-                <p id="totalAmount">Total Amount: $@total or @(double.Parse(total) * 1000) Points</p>
+                <p id="totalAmount" value="@total">Total Amount: @total VND or @(double.Parse(total) / 1000) Points</p>
+
             </div>
             <div class="form-group mt-2">
                 <label for="voucherCode">Voucher Code:</label>
@@ -112,7 +114,8 @@
                 </div>
             </div>
 
-            <button style="background-color:#013088" id="pay_paypal" onclick="cancelCancellation()" class="btn btn-primary mt-3"><i class="bi bi-paypal"></i> Pay with PayPal</button>
+            @* <button style="background-color:#013088" id="pay_paypal" onclick="cancelCancellation()" class="btn btn-primary mt-3"><i class="bi bi-paypal"></i> Pay with PayPal</button> *@
+            <button style="background-color:green" id="pay_vnpay" onclick="cancelCancellation()" class="btn btn-primary mt-3"><i class="bi bi-paypal"></i> Pay with VnPay</button>
             <button style="background-color:goldenrod" id="pay_point" onclick="cancelCancellation()" class="btn btn-primary point mt-3">Pay by Point</button>
             <a id="cancel" asp-controller="Ticket" asp-action="Cancel"
                asp-route-seatIDs="@ViewData["seatIDs"]"
@@ -157,26 +160,54 @@
     </script>
 
     <script>
-        var targetTime = new Date();
-        targetTime.setMinutes(targetTime.getMinutes() + 3);
-
-        var countdown = setInterval(function () {
-            var now = new Date().getTime();
-            var distance = targetTime - now;
-
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            document.getElementById("countdown").innerHTML = minutes + ":" + seconds;
-
-            if (distance < 0) {
-                clearInterval(countdown);
-                document.getElementById("countdown").innerHTML = "00:00";
+        function initializeCountdown() {
+            let targetTime = localStorage.getItem('targetTime');
+            if (!targetTime) {
+                targetTime = new Date().getTime() + 3 * 60 * 1000;
+                localStorage.setItem('targetTime', targetTime);
             }
-        }, 1000);
+            targetTime = new Date(parseInt(targetTime));
+
+            var countdown = setInterval(function () {
+                var now = new Date().getTime();
+                var distance = targetTime - now;
+
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                document.getElementById("countdown").innerHTML = minutes + ":" + seconds;
+
+                if (distance < 0) {
+                    clearInterval(countdown);
+                    localStorage.removeItem('targetTime');
+                    document.getElementById("countdown").innerHTML = "00:00";
+                    redirectToHomePage();
+                }
+            }, 1000);
+        }
+
+        function redirectToHomePage() {
+            $.ajax({
+                url: '/Customer/Ticket/UnlockSeats',
+                method: 'POST',
+                data: {
+                    seatIDs: '@ViewData["seatIDs"]',
+                    showtime_id: '@ViewData["showtime_id"]'
+                },
+                success: function (response) {
+                    // Handle success
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                }
+            });
+            window.location.href = '/Customer';
+        }
+
+        window.onload = initializeCountdown;
     </script>
 
     <script>
@@ -186,10 +217,14 @@
                 createForm("paypal");
             });
 
+            $('#pay_vnpay').click(function () {
+                createForm("vnpay");
+            });
+
             $('#pay_point').click(function () {
                 var point = parseFloat(@ViewData["user_points"]);
-                var total = getCurrentTotal();
-                if (point / 1000 >= total) {
+                var total = $('#totalAmount').attr('value');
+                if (point >= total / 1000) {
                     toastr.options = {
                         "closeButton": true
                     }
@@ -204,11 +239,11 @@
                 }
             });
 
-            function getCurrentTotal() {
-                var totalText = $('#totalAmount').text();
-                var total = parseFloat(totalText.replace('Total Amount: $', ''));
-                return total;
-            }
+            // function getCurrentTotal() {
+            //     var totalText = $('#totalAmount').text();
+            //     var total = parseFloat(totalText.replace('Total Amount: $', ''));
+            //     return total;
+            // }
 
             $('#applyVoucherBtn').click(function () {
                 var voucherCode = $('#voucherCode').val();
@@ -233,8 +268,9 @@
                         var originalTotal = parseFloat('@total');
                         var discountedTotal = originalTotal - (originalTotal * discountPercentage / 100);
 
-                        $('#totalAmount').text('Total Amount: $' + discountedTotal.toFixed(2) + " or " + discountedTotal.toFixed(2) * 1000 + " Points"); // Update the total amount display
-
+                        $('#totalAmount').text('Total Amount: $' + discountedTotal.toFixed(2) + " or " + discountedTotal.toFixed(2) / 1000 + " Points"); // Update the total amount display
+                        $('#totalAmount').val(discountedTotal.toFixed(2));
+                        $('#totalAmount').attr('value', discountedTotal.toFixed(2));
                         toastr.options = {
                             "closeButton": true
                         }
@@ -272,32 +308,13 @@
                 makeAjaxCall();
             }, 5000);
 
-            var timer = setTimeout(redirectToHomePage, 3 * 60 * 1000);
 
-            function redirectToHomePage() {
-                cancelCancellation();
-                $.ajax({
-                    url: '/Customer/Ticket/UnlockSeats',
-                    method: 'POST',
-                    data: {
-                        seatIDs: '@ViewData["seatIDs"]',
-                        showtime_id: '@ViewData["showtime_id"]'
-                    },
-                    success: function (response) {
-                        // Handle success
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                    }
-                });
-                window.location.href = '/Customer';
-            }
         });
 
         function createForm(payment_method) {
             var form = document.createElement('form');
             form.setAttribute('method', 'POST');
-            form.setAttribute('action', '/Customer/Ticket/BookingProcess');
+            form.setAttribute('action', '/Customer/Booking/ProceedBooking');
 
             // Create hidden input fields for seatIDList and showtime_id
             var seatIDListInput = document.createElement('input');
@@ -323,6 +340,12 @@
             voucherCodeInput.setAttribute('name', 'voucherCode');
             voucherCodeInput.setAttribute('value', $('#voucherCode').val());
             form.appendChild(voucherCodeInput);
+
+            var totalAmountInput = document.createElement('input');
+            totalAmountInput.setAttribute('type', 'hidden');
+            totalAmountInput.setAttribute('name', 'totalAmount');
+            totalAmountInput.setAttribute('value', $('#totalAmount').attr('value'));
+            form.appendChild(totalAmountInput);
 
             // Append the form to the body and submit it
             document.body.appendChild(form);

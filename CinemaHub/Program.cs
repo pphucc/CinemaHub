@@ -11,6 +11,7 @@ using CinemaHub.Hubs;
 using CinemaHub.Models;
 using CinemaHub.Services;
 using System.Configuration;
+using CinemaHub.Services.IServices;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -85,6 +86,9 @@ builder.Logging.AddSerilog(logger);
 var mailsetttings = builder.Configuration.GetSection("MailSettings");
 builder.Services.Configure<MailSettings>(mailsetttings);
 builder.Services.AddTransient<IEmailSender, SendMailService>();
+
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
+
 builder.Services.AddScoped<IUnlockASeatService, UnlockASeatService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 // Initialize database
