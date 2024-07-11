@@ -66,9 +66,7 @@ function LockAccount(url) {
                             'This account has been locked!',
                             'success'
                         )
-                        //toastr.success(data.message);
                     } else {
-                        //toastr.error(data.message);
                     }
                 }
             })
@@ -97,9 +95,7 @@ function UnlockAccount(url) {
                             'This account has been unlocked!',
                             'success'
                         )
-                        //toastr.success(data.message);
                     } else {
-                        //toastr.error(data.message);
                     }
                 }
             })

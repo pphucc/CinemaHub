@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using CinemaHub.Areas.Admin.Views.ViewModels;
-using CinemaHub.DataAccess.Data;
 using CinemaHub.DataAccess.Repositories;
 using CinemaHub.Models;
 using CinemaHub.Services;
-using System.Drawing;
 
 namespace CinemaHub.Areas.Admin.Controllers
 {
@@ -21,6 +18,7 @@ namespace CinemaHub.Areas.Admin.Controllers
 		private readonly IEmailSender _emailSender;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly UploadImageService _uploadImageService;
+
         public DashboardController(UserManager<AppUser> userManager, IEmailSender emailSender, IUnitOfWork unitOfWork, UploadImageService uploadImageService)
         {
            _userManager = userManager;
@@ -28,22 +26,17 @@ namespace CinemaHub.Areas.Admin.Controllers
 			_unitOfWork = unitOfWork;
 			_uploadImageService = uploadImageService;
         }
-		[HttpGet]
-		public IActionResult UserAccount()
-		{
-			return View();
-		}
+
         [HttpGet]
-        public IActionResult ManagerAccount()
-        {
-            return View();
-        }
-		[HttpGet]
-		public IActionResult CreateManagerAccount()
-		{
-			return View();
-		}
-		[HttpPost]
+        public IActionResult UserAccount() => View();
+
+        [HttpGet]
+        public IActionResult ManagerAccount() => View();
+
+        [HttpGet]
+        public IActionResult CreateManagerAccount() => View();
+
+        [HttpPost]
 		public async Task<IActionResult> CreateManagerAccount(CinemaManagerVM model, IFormFile? file)
 		{
             var cinemaManager = new AppUser
@@ -75,11 +68,13 @@ namespace CinemaHub.Areas.Admin.Controllers
             }			
             return RedirectToAction("ManagerAccount");
 		}
+
         [HttpGet]
 		public IActionResult Dashboard()
 		{
 			return View();
 		}
+
 		#region API Calls 
 		[HttpGet]
 		public async Task<IActionResult> GetCustomerUsers()
@@ -225,6 +220,5 @@ namespace CinemaHub.Areas.Admin.Controllers
             return Json(new { totalRevenue = total });
         }
         #endregion
-
     }
 }
