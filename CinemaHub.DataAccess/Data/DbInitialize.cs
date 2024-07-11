@@ -37,17 +37,17 @@ namespace CinemaHub.DataAccess.Data
 		{
 			var user = new AppUser
 			{
-				UserName = "truongdinhphuc23@gmail.com",
-				NormalizedUserName = "truongdinhphuc23@gmail.com".ToUpper(),
-				Email = "truongdinhphuc23@gmail.com",
-				NormalizedEmail = "truongdinhphuc23@gmail.com".ToUpper(),
+				UserName = "manager@gmail.com",
+				NormalizedUserName = "customer@gmail.com".ToUpper(),
+				Email = "manager@gmail.com",
+				NormalizedEmail = "manager@gmail.com".ToUpper(),
 				EmailConfirmed = true,
 				LockoutEnabled = false,
 				SecurityStamp = Guid.NewGuid().ToString(),
 				PhoneNumber = "0898234369",
-				FirstName = "Truong",
-				LastName = "Phuc"
-			};
+				FirstName = "Manager",
+				LastName = "Manager"
+            };
 			var roleStore = new RoleStore<IdentityRole>(_db);
 			if (!_db.Roles.Any(r => r.Name == "cinemaManager"))
 			{
@@ -60,10 +60,10 @@ namespace CinemaHub.DataAccess.Data
 			if (!_db.Users.Any(u => u.UserName == user.UserName))
 			{
 				var password = new PasswordHasher<AppUser>();
-				var hashed = password.HashPassword(user, "eagNeocbeelgUd44!");
+				var hashed = password.HashPassword(user, "Manager0123456789!");
 				user.PasswordHash = hashed;
 				var userStore = new UserStore<AppUser>(_db);
-				await _userManager.CreateAsync(user, "eagNeocbeelgUd44!");
+				await _userManager.CreateAsync(user, "Manager0123456789!");
 				await _userManager.AddToRoleAsync(user, "cinemaManager");
 			}
 		}
@@ -72,16 +72,16 @@ namespace CinemaHub.DataAccess.Data
         {
 			var user = new AppUser
 			{
-				UserName = "byte050403@gmail.com",
-				NormalizedUserName = "byte050403@gmail.com".ToUpper(),
-				Email = "byte050403@gmail.com",
-				NormalizedEmail = "byte050403@gmail.com".ToUpper(),
+				UserName = "admin@gmail.com",
+				NormalizedUserName = "admin@gmail.com".ToUpper(),
+				Email = "admin@gmail.com",
+				NormalizedEmail = "admin@gmail.com".ToUpper(),
 				EmailConfirmed = true,
 				LockoutEnabled = false,
 				SecurityStamp = Guid.NewGuid().ToString(),
 				PhoneNumber = "0981995925",
-				FirstName = "Hoang",
-				LastName = "Truong"
+				FirstName = "Admin",
+				LastName = "Admin"
 			};
 			var roleStore = new RoleStore<IdentityRole>(_db);
 			if (!_db.Roles.Any(r => r.Name == "admin"))
@@ -95,10 +95,10 @@ namespace CinemaHub.DataAccess.Data
 			if (!_db.Users.Any(u => u.UserName == user.UserName))
 			{
 				var password = new PasswordHasher<AppUser>();
-				var hashed = password.HashPassword(user, "Bai0981995925!");
+				var hashed = password.HashPassword(user, "Admin0123456789!");
 				user.PasswordHash = hashed;
 				var userStore = new UserStore<AppUser>(_db);
-				await _userManager.CreateAsync(user, "Bai0981995925!");
+				await _userManager.CreateAsync(user, "Admin0123456789!");
 				await _userManager.AddToRoleAsync(user, "admin");
 			}
 		}
