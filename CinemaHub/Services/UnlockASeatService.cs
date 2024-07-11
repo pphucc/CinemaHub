@@ -2,6 +2,7 @@
 using CinemaHub.DataAccess.Data;
 using CinemaHub.DataAccess.Repositories;
 using CinemaHub.Models;
+using CinemaHub.Services.IServices;
 
 namespace CinemaHub.Services
 {
@@ -15,6 +16,38 @@ namespace CinemaHub.Services
             _dbContextFactory = dbContextFactory;
             _unitOfWork = unitOfWork;
         }
+
+        public void LockASeat(Seat seat, Guid showtime_id, string? status)
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+            IUnitOfWork uow = new UnitOfWork(dbContext);
+            if (!seat.SeatStatus.ToLower().Contains("locked"))
+            {
+                seat.SeatStatus = "LOCKED_";
+            }
+
+            if (status == "pending")
+                if (!seat.SeatStatus.ToLower().Contains((showtime_id.ToString() + "_status=pending").ToLower()))
+                {
+                    seat.SeatStatus += showtime_id.ToString() + "_status=pending";
+                }
+
+            if (status == "success")
+            {
+                if (seat.SeatStatus.ToLower().Contains((showtime_id.ToString() + "_status=pending").ToLower()))
+                {
+                    seat.SeatStatus = seat.SeatStatus.Replace(showtime_id.ToString() + "_status=pending", showtime_id.ToString() + "_status=success");
+                }
+                else
+                {
+                    seat.SeatStatus += showtime_id.ToString() + "_status=success";
+                }
+            }
+
+            uow.Seat.Update(seat);
+            uow.Save();
+        }
+
         public void UnlockASeat(Guid seat_id, Guid showtime_id, string? status)
         {
             lock (_lockObject)

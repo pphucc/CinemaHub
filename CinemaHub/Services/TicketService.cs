@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using CinemaHub.DataAccess.Data;
 using CinemaHub.DataAccess.Repositories;
 using CinemaHub.Models;
+using CinemaHub.Services.IServices;
 
 namespace CinemaHub.Services
 {
