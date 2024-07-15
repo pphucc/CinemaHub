@@ -50,7 +50,7 @@ function LockAccount(url) {
         text: "Do you want to lock this user",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
+        confirmButtonColor: '#3085d1',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, lock it!'
     }).then((result) => {
@@ -73,6 +73,7 @@ function LockAccount(url) {
         }
     })
 }
+
 function UnlockAccount(url) {
     Swal.fire({
         title: 'Are you sure?',
@@ -80,7 +81,7 @@ function UnlockAccount(url) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        cancelButtonColor: '#d32',
         confirmButtonText: 'Yes, unlock it!'
     }).then((result) => {
         if (result.isConfirmed) {

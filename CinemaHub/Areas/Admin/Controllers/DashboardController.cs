@@ -82,12 +82,14 @@ namespace CinemaHub.Areas.Admin.Controllers
 			var customerUsers = await _userManager.GetUsersInRoleAsync("customer");							  
 			return Json(new {data = customerUsers});
 		}
+
         [HttpGet]
         public async Task<IActionResult> GetManagerUsers()
         {
             var managers = await _userManager.GetUsersInRoleAsync("cinemaManager");
             return Json(new { data = managers });
         }
+
 		[HttpGet]
 		public async Task<IActionResult> UpdateManagerAccount(Guid user_id)
 		{
@@ -98,6 +100,7 @@ namespace CinemaHub.Areas.Admin.Controllers
 			};
 			return View(cinemaManagerVM);
 		}
+
 		[HttpPost]
 		public async Task<IActionResult> UpdateManagerAccount(CinemaManagerVM model, IFormFile? file)
 		{
@@ -125,6 +128,7 @@ namespace CinemaHub.Areas.Admin.Controllers
             }						
             return RedirectToAction("ManagerAccount");
         }
+
         [HttpPost]
 		public async Task<IActionResult> LockAccount(string user_id)
 		{
@@ -138,6 +142,7 @@ namespace CinemaHub.Areas.Admin.Controllers
 			}
 			return Json(new { success = false, message = "Fail to lock this account" });
 		}
+
 		[HttpPost]
 		public async Task<IActionResult> UnlockAccount(string user_id)
 		{
@@ -151,12 +156,14 @@ namespace CinemaHub.Areas.Admin.Controllers
 			return Json(new { success = false, message = "Fail to unlock this account" });
 		}
 
+
 		[HttpGet]
 		public async Task<IActionResult> GetAllTickets()
 		{
 			var tickets = await _unitOfWork.Ticket.GetAllAsync();
 			return Json(new {data = tickets});
 		}
+
 
 		[HttpGet]
 		public async Task<IActionResult> GetTrendingMovies(string? filter = null)
@@ -199,12 +206,14 @@ namespace CinemaHub.Areas.Admin.Controllers
 
 			return Json(new { data = trendingMovies });
 		}
+
 		[HttpGet]
 		public async Task<IActionResult> GetTotalCustomers()
 		{
 			var customer = await _userManager.GetUsersInRoleAsync("customer");
 			return Json(new {count =  customer.Count});
 		}
+
         [HttpGet]
         public async Task<IActionResult> GetTotalTickets()
         {
@@ -212,6 +221,7 @@ namespace CinemaHub.Areas.Admin.Controllers
 			var total = tickets.Count();
             return Json(new {totalTickets = total});
         }
+
         [HttpGet]
         public async Task<IActionResult> GetTotalRevenue()
         {
