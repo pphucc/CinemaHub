@@ -37,13 +37,13 @@
             </div>
 
             <div class="col-12 mt-5">
-                <label asp-for="@Model.ImageUrl">ImageUrl</label>
+                <label asp-for="@Model.ImageUrl">Image Url</label>
                 <input type="file" name="fileImage" asp-for="@Model.ImageUrl" rows="3" class="form-control" />
                 <span asp-validation-for="@Model.ImageUrl" class="text-danger"></span>
                 <span class="text-danger">@ViewData["imageError"]</span>
             </div>
             <div class="col-12 mt-5">
-                <label asp-for="@Model.VideoUrl">VideoUrl</label>
+                <label asp-for="@Model.VideoUrl">Video Url</label>
                 <input type="file" name="fileVideo" asp-for="@Model.VideoUrl" rows="3" class="form-control">
                 <span asp-validation-for="@Model.VideoUrl" class="text-danger"></span>
                 <span class="text-danger">@ViewData["videoError"]</span>
